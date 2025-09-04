@@ -4,7 +4,7 @@
 包含各种函数类型的MPFR测试代码生成器
 """
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class TestTemplateGenerator:
@@ -147,8 +147,8 @@ int main() {{
     mpfr_init2(error, {self.mpfr_precision});
     mpfr_init2(abs_ref, {self.mpfr_precision});
 
-    double test_samples[] = {{{', '.join(map(str, samples[:5]))}, 0.0, -0.0}};
-    int n_samples = {min(5, len(samples)) + 2};
+    double test_samples[] = {{{', '.join(map(str, samples[:50]))}, 0.0, -0.0}};
+    int n_samples = {min(50, len(samples)) + 2};
 
     printf("# x_value, user_value, mpfr_value, relative_error\\n");
 
@@ -183,6 +183,25 @@ int main() {{
     return 0;
 }}'''
         return test_code
+
+    def generate_test_code_with_sources(self, user_code: Optional[str], target: str,
+                                      samples: List[Tuple[float, str]], category: str, subtype: str) -> Optional[str]:
+        """
+        生成测试代码 - 支持样本来源信息
+        Args:
+            user_code: 用户代码
+            target: 目标描述
+            samples: 样本列表，每个元素为(样本值, 来源标识)
+            category: 函数类别
+            subtype: 函数子类别
+        Returns:
+            生成的测试代码
+        """
+        # 提取样本值但保留更多样本（最多100个而不是5个）
+        sample_values = [val for val, source in samples[:100]]
+
+        # 调用原有的测试代码生成方法
+        return self.generate_test_code(user_code, target, sample_values, category, subtype)
 
     def generate_financial_test(self, user_code: Optional[str], target: str,
                               samples: List[float], subtype: str) -> str:
