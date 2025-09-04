@@ -1,0 +1,90 @@
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double exp_minus_one(double x)，输入范围x∈[-1e-8, 1e-8]，要求避免相消误差，仅允许使用math.h库，禁止外部库和符号计算。测试样本包括：常规样本(x=5.3e-9, -7.1e-9)、边界样本(x=1e-12, -1e-15)、对抗样本(x=2.2e-308)。"
+        }
+    ],
+    "target": "return expm1(x);"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double optimized_sin(double x)，输入范围x∈[-1e-7, 1e-7]，要求优化|x|<1e-5的精度，保留负零符号，处理NaN/Inf传播。测试样本：极小角度(x=5e-8, -3e-9)、临界切换点(x=9.999e-6, -1.0001e-5)、零值(x=0.0, -0.0)。仅允许使用math.h库。"
+        }
+    ],
+    "target": "if (isnan(x)) return x; if (isinf(x)) return NAN; if (x == 0.0) return x; if (fabs(x) < 1e-5) { double x2 = x * x; return x * (1.0 - x2/6.0 * (1.0 - x2/20.0)); } return sin(x);"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数Point global_min(double (*f)(double, double), Point domain)，求解测试函数f(x,y) = exp(sin(50*x)) + sin(60*exp(y)) + sin(70*sin(x)) + sin(sin(80*y)) - sin(10*(x+y)) + (x*x + y*y)/4在域x,y∈[-1,1]内的全局极小值。要求：混合精度策略(FP64+FP128)、自动检测梯度法失效、区间验证，最大函数评估次数1000000，目标精度15位数字。禁止使用符号计算库。"
+        }
+    ],
+    "target": "DIRECT算法+Nelder-Mead精修+区间验证，最优解：x=-0.02440307923, y=0.2106124271, f_min=-3.306868647475"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double adaptive_integrate(double (*f)(double), double a, double b)，计算积分f(x) = [sin(x)/(x*sqrt(1+x²))] * exp(-x/100)在∫₀^∞上的值。要求：自动变换选择、动态精度调整（1e-6→1e-20）、理论截断误差推导，最大函数评估次数10000000，目标精度20位有效数字。禁止使用符号计算。"
+        }
+    ],
+    "target": "自动选择exp-sinh或tanh-sinh变换，动态精度控制，误差估计导向的采样密度调整"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数void direct_sum(mpf_t result)计算级数S = Σ_{n=1}^{200} (-1)^n * n! / (10^n (n-10)^3)。要求：使用GMP库、精确计算n!、检测分母(n-10)^3接近零、处理中间项溢出，至少2000位精度，结果保留15位有效数字。"
+        }
+    ],
+    "target": "使用GMP高精度库实现精确n!计算，检测n≥172的阶乘溢出"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double compound_value(double principal, double rate, int years)，计算复利终值。输入范围：principal∈[1,1e9]USD，rate∈[0,0.3]年利率，years∈[0,100]整数。要求零利率时返回本金，小利率高精度(rate<1e-5)，长期计算优化(years>50)。仅允许使用math.h库。"
+        }
+    ],
+    "target": "if (rate == 0.0 || years == 0) return principal; if (rate < 1e-5) { double log_base = years * rate * (1 - rate/2); return principal * exp(log_base); } return principal * exp(years * log1p(rate));"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double implied_volatility(double S, double K, double T, double r, double option_price)，计算期权隐含波动率。要求：ATM期权稳定性(|S/K-1|<0.01%)、短期期权精度(T<0.1)、除零防护(vega<1e-10)，使用牛顿迭代法，最大迭代10次，收敛阈值1e-8。仅允许使用math.h库。"
+        }
+    ],
+    "target": "短期期权使用Brenner-Subrahmanyam近似，牛顿迭代法，vega<1e-10时切换二分法"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double internal_rate_of_return(double* cash_flows, int n_periods)，计算内部收益率。输入：cash_flows数组(首期为负投资)，n_periods∈[2,30]。要求：现金流符号交替>3次时使用二分法混合牛顿法，|r|<0.005时泰勒展开(1+r)^t，智能初始估计，迭代上限20步，收敛阈值1e-8。仅用math.h基础函数。"
+        }
+    ],
+    "target": "智能初始估计r₀=pow(终值/|初值|,1/T)-1，|r|<0.005时泰勒展开(1+r)^t，符号交替>3次时混合二分法"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数double adaptive_singular_integral(double (*f)(double), double a, double b)，计算积分f(x) = x^{-0.9}/(1+1000(x-0.5)^2)在∫₀^1上的值。要求：x=0奇异性处理（双指数变换）、峰值区域检测(0.499, 0.501)、混合精度(FP64检测+FP128精修)，目标精度30位数字，最大函数评估次数100000000，峰值区域采样密度5000点/单位宽度。禁止符号预处理。"
+        }
+    ],
+    "target": "区间拆分：part1=de_transform(f,0,0.499)，谱方法：part2=chebyshev_spectral(f,0.499,0.501,2000)，双指数变换：part3=de_transform(f,0.501,1)"
+}
+{
+    "input": [
+        {
+            "role": "user",
+            "content": "实现函数struct EigenResult extreme_eigenpair(double A[4][4])，计算测试矩阵A = diag([1e-20, 1e-15, 1e-10, 1]) + random_ortho(4)*1e-25的最小特征值和特征向量。要求：条件数cond(A)=1e20，目标精度25位有效数字（最小特征值），200位精度运算，迭代精修，近似线性相关检测，最大计算时间1小时。禁止符号计算。"
+        }
+    ],
+    "target": "平衡缩放：scale_matrix(A)，分块对角化：deflate_small_blocks(A, 1e-18)，高精度QR迭代：for(i=0; i<200; i++)，残差补偿：apply_kahan_compensation(eigenvec)"
+}

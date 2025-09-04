@@ -1,0 +1,1747 @@
+[
+  {
+    "task_id": "HumanEval/22",
+    "prompt": "from typing import List, Any\n\n\ndef filter_integers(values: List[Any]) -> List[int]:\n    \"\"\" Filter given list of any python values only for integers\n    >>> filter_integers(['a', 3.14, 5])\n    [5]\n    >>> filter_integers([1, 2, 3, 'abc', {}, []])\n    [1, 2, 3]\n    \"\"\"\n",
+    "entry_point": "filter_integers",
+    "canonical_solution": "    return [x for x in values if isinstance(x, int)]\n",
+    "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate([]) == []\n    assert candidate([4, {}, [], 23.2, 9, 'adasd']) == [4, 9]\n    assert candidate([3, 'c', 3, 3, 'a', 'b']) == [3, 3, 3]\n",
+    "_dataset": "HumanEval",
+    "_original_index": 22
+  },
+  {
+    "task_id": "HumanEval/25",
+    "prompt": "from typing import List\n\n\ndef factorize(n: int) -> List[int]:\n    \"\"\" Return list of prime factors of given integer in the order from smallest to largest.\n    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.\n    Input number should be equal to the product of all factors\n    >>> factorize(8)\n    [2, 2, 2]\n    >>> factorize(25)\n    [5, 5]\n    >>> factorize(70)\n    [2, 5, 7]\n    \"\"\"\n",
+    "entry_point": "factorize",
+    "canonical_solution": "    import math\n    fact = []\n    i = 2\n    while i <= int(math.sqrt(n) + 1):\n        if n % i == 0:\n            fact.append(i)\n            n //= i\n        else:\n            i += 1\n\n    if n > 1:\n        fact.append(n)\n    return fact\n",
+    "test": "\n\nMETADATA = {\n    'author': 'jt',\n    'dataset': 'test'\n}\n\n\ndef check(candidate):\n    assert candidate(2) == [2]\n    assert candidate(4) == [2, 2]\n    assert candidate(8) == [2, 2, 2]\n    assert candidate(3 * 19) == [3, 19]\n    assert candidate(3 * 19 * 3 * 19) == [3, 3, 19, 19]\n    assert candidate(3 * 19 * 3 * 19 * 3 * 19) == [3, 3, 3, 19, 19, 19]\n    assert candidate(3 * 19 * 19 * 19) == [3, 19, 19, 19]\n    assert candidate(3 * 2 * 3) == [2, 3, 3]\n",
+    "_dataset": "HumanEval",
+    "_original_index": 25
+  },
+  {
+    "task_id": "HumanEval/32",
+    "prompt": "import math\n\n\ndef poly(xs: list, x: float):\n    \"\"\"\n    Evaluates polynomial with coefficients xs at point x.\n    return xs[0] + xs[1] * x + xs[1] * x^2 + .... xs[n] * x^n\n    \"\"\"\n    return sum([coeff * math.pow(x, i) for i, coeff in enumerate(xs)])\n\n\ndef find_zero(xs: list):\n    \"\"\" xs are coefficients of a polynomial.\n    find_zero find x such that poly(x) = 0.\n    find_zero returns only only zero point, even if there are many.\n    Moreover, find_zero only takes list xs having even number of coefficients\n    and largest non zero coefficient as it guarantees\n    a solution.\n    >>> round(find_zero([1, 2]), 2) # f(x) = 1 + 2x\n    -0.5\n    >>> round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3) = -6 + 11x - 6x^2 + x^3\n    1.0\n    \"\"\"\n",
+    "entry_point": "find_zero",
+    "canonical_solution": "    begin, end = -1., 1.\n    while poly(xs, begin) * poly(xs, end) > 0:\n        begin *= 2.0\n        end *= 2.0\n    while end - begin > 1e-10:\n        center = (begin + end) / 2.0\n        if poly(xs, center) * poly(xs, begin) > 0:\n            begin = center\n        else:\n            end = center\n    return begin\n",
+    "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    import math\n    import random\n    rng = random.Random(42)\n    import copy\n    for _ in range(100):\n        ncoeff = 2 * rng.randint(1, 4)\n        coeffs = []\n        for _ in range(ncoeff):\n            coeff = rng.randint(-10, 10)\n            if coeff == 0:\n                coeff = 1\n            coeffs.append(coeff)\n        solution = candidate(copy.deepcopy(coeffs))\n        assert math.fabs(poly(coeffs, solution)) < 1e-4\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 32
+  },
+  {
+    "task_id": "HumanEval/39",
+    "prompt": "\n\ndef prime_fib(n: int):\n    \"\"\"\n    prime_fib returns n-th number that is a Fibonacci number and it's also prime.\n    >>> prime_fib(1)\n    2\n    >>> prime_fib(2)\n    3\n    >>> prime_fib(3)\n    5\n    >>> prime_fib(4)\n    13\n    >>> prime_fib(5)\n    89\n    \"\"\"\n",
+    "entry_point": "prime_fib",
+    "canonical_solution": "    import math\n\n    def is_prime(p):\n        if p < 2:\n            return False\n        for k in range(2, min(int(math.sqrt(p)) + 1, p - 1)):\n            if p % k == 0:\n                return False\n        return True\n    f = [0, 1]\n    while True:\n        f.append(f[-1] + f[-2])\n        if is_prime(f[-1]):\n            n -= 1\n        if n == 0:\n            return f[-1]\n",
+    "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    assert candidate(1) == 2\n    assert candidate(2) == 3\n    assert candidate(3) == 5\n    assert candidate(4) == 13\n    assert candidate(5) == 89\n    assert candidate(6) == 233\n    assert candidate(7) == 1597\n    assert candidate(8) == 28657\n    assert candidate(9) == 514229\n    assert candidate(10) == 433494437\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 39
+  },
+  {
+    "task_id": "HumanEval/41",
+    "prompt": "\n\ndef car_race_collision(n: int):\n    \"\"\"\n    Imagine a road that's a perfectly straight infinitely long line.\n    n cars are driving left to right;  simultaneously, a different set of n cars\n    are driving right to left.   The two sets of cars start out being very far from\n    each other.  All cars move in the same speed.  Two cars are said to collide\n    when a car that's moving left to right hits a car that's moving right to left.\n    However, the cars are infinitely sturdy and strong; as a result, they continue moving\n    in their trajectory as if they did not collide.\n\n    This function outputs the number of such collisions.\n    \"\"\"\n",
+    "entry_point": "car_race_collision",
+    "canonical_solution": "    return n**2\n",
+    "test": "\n\nMETADATA = {}\n\n\ndef check(candidate):\n    assert candidate(2) == 4\n    assert candidate(3) == 9\n    assert candidate(4) == 16\n    assert candidate(8) == 64\n    assert candidate(10) == 100\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 41
+  },
+  {
+    "task_id": "HumanEval/81",
+    "prompt": "\ndef numerical_letter_grade(grades):\n    \"\"\"It is the last week of the semester and the teacher has to give the grades\n    to students. The teacher has been making her own algorithm for grading.\n    The only problem is, she has lost the code she used for grading.\n    She has given you a list of GPAs for some students and you have to write \n    a function that can output a list of letter grades using the following table:\n             GPA       |    Letter grade\n              4.0                A+\n            > 3.7                A \n            > 3.3                A- \n            > 3.0                B+\n            > 2.7                B \n            > 2.3                B-\n            > 2.0                C+\n            > 1.7                C\n            > 1.3                C-\n            > 1.0                D+ \n            > 0.7                D \n            > 0.0                D-\n              0.0                E\n    \n\n    Example:\n    grade_equation([4.0, 3, 1.7, 2, 3.5]) ==> ['A+', 'B', 'C-', 'C', 'A-']\n    \"\"\"\n",
+    "entry_point": "numerical_letter_grade",
+    "canonical_solution": "\n   \n    letter_grade = []\n    for gpa in grades:\n        if gpa == 4.0:\n            letter_grade.append(\"A+\")\n        elif gpa > 3.7:\n            letter_grade.append(\"A\")\n        elif gpa > 3.3:\n            letter_grade.append(\"A-\")\n        elif gpa > 3.0:\n            letter_grade.append(\"B+\")\n        elif gpa > 2.7:\n            letter_grade.append(\"B\")\n        elif gpa > 2.3:\n            letter_grade.append(\"B-\")\n        elif gpa > 2.0:\n            letter_grade.append(\"C+\")\n        elif gpa > 1.7:\n            letter_grade.append(\"C\")\n        elif gpa > 1.3:\n            letter_grade.append(\"C-\")\n        elif gpa > 1.0:\n            letter_grade.append(\"D+\")\n        elif gpa > 0.7:\n            letter_grade.append(\"D\")\n        elif gpa > 0.0:\n            letter_grade.append(\"D-\")\n        else:\n            letter_grade.append(\"E\")\n    return letter_grade\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate([4.0, 3, 1.7, 2, 3.5]) == ['A+', 'B', 'C-', 'C', 'A-']\n    assert candidate([1.2]) == ['D+']\n    assert candidate([0.5]) == ['D-']\n    assert candidate([0.0]) == ['E']\n    assert candidate([1, 0.3, 1.5, 2.8, 3.3]) == ['D', 'D-', 'C-', 'B', 'B+']\n    assert candidate([0, 0.7]) == ['E', 'D-']\n\n    # Check some edge cases that are easy to work out by hand.\n    assert True\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 81
+  },
+  {
+    "task_id": "HumanEval/92",
+    "prompt": "\ndef any_int(x, y, z):\n    '''\n    Create a function that takes 3 numbers.\n    Returns true if one of the numbers is equal to the sum of the other two, and all numbers are integers.\n    Returns false in any other cases.\n    \n    Examples\n    any_int(5, 2, 7) ➞ True\n    \n    any_int(3, 2, 2) ➞ False\n\n    any_int(3, -2, 1) ➞ True\n    \n    any_int(3.6, -2.2, 2) ➞ False\n  \n\n    \n    '''\n",
+    "entry_point": "any_int",
+    "canonical_solution": "    \n    if isinstance(x,int) and isinstance(y,int) and isinstance(z,int):\n        if (x+y==z) or (x+z==y) or (y+z==x):\n            return True\n        return False\n    return False\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate(2, 3, 1)==True, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate(2.5, 2, 3)==False, \"This prints if this assert fails 2 (good for debugging!)\"\n    assert candidate(1.5, 5, 3.5)==False, \"This prints if this assert fails 3 (good for debugging!)\"\n    assert candidate(2, 6, 2)==False, \"This prints if this assert fails 4 (good for debugging!)\"\n    assert candidate(4, 2, 2)==True, \"This prints if this assert fails 5 (good for debugging!)\"\n    assert candidate(2.2, 2.2, 2.2)==False, \"This prints if this assert fails 6 (good for debugging!)\"\n    assert candidate(-4, 6, 2)==True, \"This prints if this assert fails 7 (good for debugging!)\"\n\n    # Check some edge cases that are easy to work out by hand.\n    assert candidate(2,1,1)==True, \"This prints if this assert fails 8 (also good for debugging!)\"\n    assert candidate(3,4,7)==True, \"This prints if this assert fails 9 (also good for debugging!)\"\n    assert candidate(3.0,4,7)==False, \"This prints if this assert fails 10 (also good for debugging!)\"\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 92
+  },
+  {
+    "task_id": "HumanEval/95",
+    "prompt": "\ndef check_dict_case(dict):\n    \"\"\"\n    Given a dictionary, return True if all keys are strings in lower \n    case or all keys are strings in upper case, else return False.\n    The function should return False is the given dictionary is empty.\n    Examples:\n    check_dict_case({\"a\":\"apple\", \"b\":\"banana\"}) should return True.\n    check_dict_case({\"a\":\"apple\", \"A\":\"banana\", \"B\":\"banana\"}) should return False.\n    check_dict_case({\"a\":\"apple\", 8:\"banana\", \"a\":\"apple\"}) should return False.\n    check_dict_case({\"Name\":\"John\", \"Age\":\"36\", \"City\":\"Houston\"}) should return False.\n    check_dict_case({\"STATE\":\"NC\", \"ZIP\":\"12345\" }) should return True.\n    \"\"\"\n",
+    "entry_point": "check_dict_case",
+    "canonical_solution": "    if len(dict.keys()) == 0:\n        return False\n    else:\n        state = \"start\"\n        for key in dict.keys():\n\n            if isinstance(key, str) == False:\n                state = \"mixed\"\n                break\n            if state == \"start\":\n                if key.isupper():\n                    state = \"upper\"\n                elif key.islower():\n                    state = \"lower\"\n                else:\n                    break\n            elif (state == \"upper\" and not key.isupper()) or (state == \"lower\" and not key.islower()):\n                    state = \"mixed\"\n                    break\n            else:\n                break\n        return state == \"upper\" or state == \"lower\" \n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate({\"p\":\"pineapple\", \"b\":\"banana\"}) == True, \"First test error: \" + str(candidate({\"p\":\"pineapple\", \"b\":\"banana\"}))\n    assert candidate({\"p\":\"pineapple\", \"A\":\"banana\", \"B\":\"banana\"}) == False, \"Second test error: \" + str(candidate({\"p\":\"pineapple\", \"A\":\"banana\", \"B\":\"banana\"}))\n    assert candidate({\"p\":\"pineapple\", 5:\"banana\", \"a\":\"apple\"}) == False, \"Third test error: \" + str(candidate({\"p\":\"pineapple\", 5:\"banana\", \"a\":\"apple\"}))\n    assert candidate({\"Name\":\"John\", \"Age\":\"36\", \"City\":\"Houston\"}) == False, \"Fourth test error: \" + str(candidate({\"Name\":\"John\", \"Age\":\"36\", \"City\":\"Houston\"}))\n    assert candidate({\"STATE\":\"NC\", \"ZIP\":\"12345\" }) == True, \"Fifth test error: \" + str(candidate({\"STATE\":\"NC\", \"ZIP\":\"12345\" }))      \n    assert candidate({\"fruit\":\"Orange\", \"taste\":\"Sweet\" }) == True, \"Fourth test error: \" + str(candidate({\"fruit\":\"Orange\", \"taste\":\"Sweet\" }))      \n\n\n    # Check some edge cases that are easy to work out by hand.\n    assert candidate({}) == False, \"1st edge test error: \" + str(candidate({}))\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 95
+  },
+  {
+    "task_id": "HumanEval/99",
+    "prompt": "\ndef closest_integer(value):\n    '''\n    Create a function that takes a value (string) representing a number\n    and returns the closest integer to it. If the number is equidistant\n    from two integers, round it away from zero.\n\n    Examples\n    >>> closest_integer(\"10\")\n    10\n    >>> closest_integer(\"15.3\")\n    15\n\n    Note:\n    Rounding away from zero means that if the given number is equidistant\n    from two integers, the one you should return is the one that is the\n    farthest from zero. For example closest_integer(\"14.5\") should\n    return 15 and closest_integer(\"-14.5\") should return -15.\n    '''\n",
+    "entry_point": "closest_integer",
+    "canonical_solution": "    from math import floor, ceil\n\n    if value.count('.') == 1:\n        # remove trailing zeros\n        while (value[-1] == '0'):\n            value = value[:-1]\n\n    num = float(value)\n    if value[-2:] == '.5':\n        if num > 0:\n            res = ceil(num)\n        else:\n            res = floor(num)\n    elif len(value) > 0:\n        res = int(round(num))\n    else:\n        res = 0\n\n    return res\n\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate(\"10\") == 10, \"Test 1\"\n    assert candidate(\"14.5\") == 15, \"Test 2\"\n    assert candidate(\"-15.5\") == -16, \"Test 3\"\n    assert candidate(\"15.3\") == 15, \"Test 3\"\n\n    # Check some edge cases that are easy to work out by hand.\n    assert candidate(\"0\") == 0, \"Test 0\"\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 99
+  },
+  {
+    "task_id": "HumanEval/109",
+    "prompt": "\ndef move_one_ball(arr):\n    \"\"\"We have an array 'arr' of N integers arr[1], arr[2], ..., arr[N].The\n    numbers in the array will be randomly ordered. Your task is to determine if\n    it is possible to get an array sorted in non-decreasing order by performing \n    the following operation on the given array:\n        You are allowed to perform right shift operation any number of times.\n    \n    One right shift operation means shifting all elements of the array by one\n    position in the right direction. The last element of the array will be moved to\n    the starting position in the array i.e. 0th index. \n\n    If it is possible to obtain the sorted array by performing the above operation\n    then return True else return False.\n    If the given array is empty then return True.\n\n    Note: The given list is guaranteed to have unique elements.\n\n    For Example:\n    \n    move_one_ball([3, 4, 5, 1, 2])==>True\n    Explanation: By performin 2 right shift operations, non-decreasing order can\n                 be achieved for the given array.\n    move_one_ball([3, 5, 4, 1, 2])==>False\n    Explanation:It is not possible to get non-decreasing order for the given\n                array by performing any number of right shift operations.\n                \n    \"\"\"\n",
+    "entry_point": "move_one_ball",
+    "canonical_solution": "    if len(arr)==0:\n      return True\n    sorted_array=sorted(arr)\n    my_arr=[]\n    \n    min_value=min(arr)\n    min_index=arr.index(min_value)\n    my_arr=arr[min_index:]+arr[0:min_index]\n    for i in range(len(arr)):\n      if my_arr[i]!=sorted_array[i]:\n        return False\n    return True\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate([3, 4, 5, 1, 2])==True, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([3, 5, 10, 1, 2])==True\n    assert candidate([4, 3, 1, 2])==False\n    # Check some edge cases that are easy to work out by hand.\n    assert candidate([3, 5, 4, 1, 2])==False, \"This prints if this assert fails 2 (also good for debugging!)\"\n    assert candidate([])==True\n",
+    "_dataset": "HumanEval",
+    "_original_index": 109
+  },
+  {
+    "task_id": "HumanEval/115",
+    "prompt": "\ndef max_fill(grid, capacity):\n    import math\n    \"\"\"\n    You are given a rectangular grid of wells. Each row represents a single well,\n    and each 1 in a row represents a single unit of water.\n    Each well has a corresponding bucket that can be used to extract water from it, \n    and all buckets have the same capacity.\n    Your task is to use the buckets to empty the wells.\n    Output the number of times you need to lower the buckets.\n\n    Example 1:\n        Input: \n            grid : [[0,0,1,0], [0,1,0,0], [1,1,1,1]]\n            bucket_capacity : 1\n        Output: 6\n\n    Example 2:\n        Input: \n            grid : [[0,0,1,1], [0,0,0,0], [1,1,1,1], [0,1,1,1]]\n            bucket_capacity : 2\n        Output: 5\n    \n    Example 3:\n        Input: \n            grid : [[0,0,0], [0,0,0]]\n            bucket_capacity : 5\n        Output: 0\n\n    Constraints:\n        * all wells have the same length\n        * 1 <= grid.length <= 10^2\n        * 1 <= grid[:,1].length <= 10^2\n        * grid[i][j] -> 0 | 1\n        * 1 <= capacity <= 10\n    \"\"\"\n",
+    "entry_point": "max_fill",
+    "canonical_solution": "    return sum([math.ceil(sum(arr)/capacity) for arr in grid])\n",
+    "test": "def check(candidate):\n\n\n    # Check some simple cases\n    assert True, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([[0,0,1,0], [0,1,0,0], [1,1,1,1]], 1) == 6, \"Error\"\n    assert candidate([[0,0,1,1], [0,0,0,0], [1,1,1,1], [0,1,1,1]], 2) == 5, \"Error\"\n    assert candidate([[0,0,0], [0,0,0]], 5) == 0, \"Error\"\n\n    # Check some edge cases that are easy to work out by hand.\n    assert True, \"This prints if this assert fails 2 (also good for debugging!)\"\n    assert candidate([[1,1,1,1], [1,1,1,1]], 2) == 4, \"Error\"\n    assert candidate([[1,1,1,1], [1,1,1,1]], 9) == 2, \"Error\"\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 115
+  },
+  {
+    "task_id": "HumanEval/118",
+    "prompt": "\ndef get_closest_vowel(word):\n    \"\"\"You are given a word. Your task is to find the closest vowel that stands between \n    two consonants from the right side of the word (case sensitive).\n    \n    Vowels in the beginning and ending doesn't count. Return empty string if you didn't\n    find any vowel met the above condition. \n\n    You may assume that the given string contains English letter only.\n\n    Example:\n    get_closest_vowel(\"yogurt\") ==> \"u\"\n    get_closest_vowel(\"FULL\") ==> \"U\"\n    get_closest_vowel(\"quick\") ==> \"\"\n    get_closest_vowel(\"ab\") ==> \"\"\n    \"\"\"\n",
+    "entry_point": "get_closest_vowel",
+    "canonical_solution": "    if len(word) < 3:\n        return \"\"\n\n    vowels = {\"a\", \"e\", \"i\", \"o\", \"u\", \"A\", \"E\", 'O', 'U', 'I'}\n    for i in range(len(word)-2, 0, -1):\n        if word[i] in vowels:\n            if (word[i+1] not in vowels) and (word[i-1] not in vowels):\n                return word[i]\n    return \"\"\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate(\"yogurt\") == \"u\"\n    assert candidate(\"full\") == \"u\"\n    assert candidate(\"easy\") == \"\"\n    assert candidate(\"eAsy\") == \"\"\n    assert candidate(\"ali\") == \"\"\n    assert candidate(\"bad\") == \"a\"\n    assert candidate(\"most\") == \"o\"\n    assert candidate(\"ab\") == \"\"\n    assert candidate(\"ba\") == \"\"\n    assert candidate(\"quick\") == \"\"\n    assert candidate(\"anime\") == \"i\"\n    assert candidate(\"Asia\") == \"\"\n    assert candidate(\"Above\") == \"o\"\n\n    # Check some edge cases that are easy to work out by hand.\n    assert True\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 118
+  },
+  {
+    "task_id": "HumanEval/123",
+    "prompt": "\ndef get_odd_collatz(n):\n    \"\"\"\n    Given a positive integer n, return a sorted list that has the odd numbers in collatz sequence.\n\n    The Collatz conjecture is a conjecture in mathematics that concerns a sequence defined\n    as follows: start with any positive integer n. Then each term is obtained from the \n    previous term as follows: if the previous term is even, the next term is one half of \n    the previous term. If the previous term is odd, the next term is 3 times the previous\n    term plus 1. The conjecture is that no matter what value of n, the sequence will always reach 1.\n\n    Note: \n        1. Collatz(1) is [1].\n        2. returned list sorted in increasing order.\n\n    For example:\n    get_odd_collatz(5) returns [1, 5] # The collatz sequence for 5 is [5, 16, 8, 4, 2, 1], so the odd numbers are only 1, and 5.\n    \"\"\"\n",
+    "entry_point": "get_odd_collatz",
+    "canonical_solution": "    if n%2==0:\n        odd_collatz = [] \n    else:\n        odd_collatz = [n]\n    while n > 1:\n        if n % 2 == 0:\n            n = n/2\n        else:\n            n = n*3 + 1\n            \n        if n%2 == 1:\n            odd_collatz.append(int(n))\n\n    return sorted(odd_collatz)\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate(14) == [1, 5, 7, 11, 13, 17]\n    assert candidate(5) == [1, 5]\n    assert candidate(12) == [1, 3, 5], \"This prints if this assert fails 1 (good for debugging!)\"\n\n    # Check some edge cases that are easy to work out by hand.\n    assert candidate(1) == [1], \"This prints if this assert fails 2 (also good for debugging!)\"\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 123
+  },
+  {
+    "task_id": "HumanEval/133",
+    "prompt": "\n\ndef sum_squares(lst):\n    \"\"\"You are given a list of numbers.\n    You need to return the sum of squared numbers in the given list,\n    round each element in the list to the upper int(Ceiling) first.\n    Examples:\n    For lst = [1,2,3] the output should be 14\n    For lst = [1,4,9] the output should be 98\n    For lst = [1,3,5,7] the output should be 84\n    For lst = [1.4,4.2,0] the output should be 29\n    For lst = [-2.4,1,1] the output should be 6\n    \n\n    \"\"\"\n",
+    "entry_point": "sum_squares",
+    "canonical_solution": "    import math\n    squared = 0\n    for i in lst:\n        squared += math.ceil(i)**2\n    return squared\n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate([1,2,3])==14, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([1.0,2,3])==14, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([1,3,5,7])==84, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([1.4,4.2,0])==29, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([-2.4,1,1])==6, \"This prints if this assert fails 1 (good for debugging!)\"\n\n    assert candidate([100,1,15,2])==10230, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([10000,10000])==200000000, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([-1.4,4.6,6.3])==75, \"This prints if this assert fails 1 (good for debugging!)\"\n    assert candidate([-1.4,17.9,18.9,19.9])==1086, \"This prints if this assert fails 1 (good for debugging!)\"\n\n\n    # Check some edge cases that are easy to work out by hand.\n    assert candidate([0])==0, \"This prints if this assert fails 2 (also good for debugging!)\"\n    assert candidate([-1])==1, \"This prints if this assert fails 2 (also good for debugging!)\"\n    assert candidate([-1,1,0])==2, \"This prints if this assert fails 2 (also good for debugging!)\"\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 133
+  },
+  {
+    "task_id": "HumanEval/137",
+    "prompt": "\ndef compare_one(a, b):\n    \"\"\"\n    Create a function that takes integers, floats, or strings representing\n    real numbers, and returns the larger variable in its given variable type.\n    Return None if the values are equal.\n    Note: If a real number is represented as a string, the floating point might be . or ,\n\n    compare_one(1, 2.5) ➞ 2.5\n    compare_one(1, \"2,3\") ➞ \"2,3\"\n    compare_one(\"5,1\", \"6\") ➞ \"6\"\n    compare_one(\"1\", 1) ➞ None\n    \"\"\"\n",
+    "entry_point": "compare_one",
+    "canonical_solution": "    temp_a, temp_b = a, b\n    if isinstance(temp_a, str): temp_a = temp_a.replace(',','.')\n    if isinstance(temp_b, str): temp_b = temp_b.replace(',','.')\n    if float(temp_a) == float(temp_b): return None\n    return a if float(temp_a) > float(temp_b) else b \n",
+    "test": "def check(candidate):\n\n    # Check some simple cases\n    assert candidate(1, 2) == 2\n    assert candidate(1, 2.5) == 2.5\n    assert candidate(2, 3) == 3\n    assert candidate(5, 6) == 6\n    assert candidate(1, \"2,3\") == \"2,3\"\n    assert candidate(\"5,1\", \"6\") == \"6\"\n    assert candidate(\"1\", \"2\") == \"2\"\n    assert candidate(\"1\", 1) == None\n\n    # Check some edge cases that are easy to work out by hand.\n    assert True\n\n",
+    "_dataset": "HumanEval",
+    "_original_index": 137
+  },
+  {
+    "text": "Write a function to find the minimum cost path to reach (m, n) from (0, 0) for the given cost matrix cost[][] and a position (m, n) in cost[][].",
+    "code": "R = 3\r\nC = 3\r\ndef min_cost(cost, m, n): \r\n\ttc = [[0 for x in range(C)] for x in range(R)] \r\n\ttc[0][0] = cost[0][0] \r\n\tfor i in range(1, m+1): \r\n\t\ttc[i][0] = tc[i-1][0] + cost[i][0] \r\n\tfor j in range(1, n+1): \r\n\t\ttc[0][j] = tc[0][j-1] + cost[0][j] \r\n\tfor i in range(1, m+1): \r\n\t\tfor j in range(1, n+1): \r\n\t\t\ttc[i][j] = min(tc[i-1][j-1], tc[i-1][j], tc[i][j-1]) + cost[i][j] \r\n\treturn tc[m][n]",
+    "task_id": 1,
+    "test_setup_code": "",
+    "test_list": [
+      "assert min_cost([[1, 2, 3], [4, 8, 2], [1, 5, 3]], 2, 2) == 8",
+      "assert min_cost([[2, 3, 4], [5, 9, 3], [2, 6, 4]], 2, 2) == 12",
+      "assert min_cost([[3, 4, 5], [6, 10, 4], [3, 7, 5]], 2, 2) == 16"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 0
+  },
+  {
+    "text": "Write a python function to identify non-prime numbers.",
+    "code": "import math\r\ndef is_not_prime(n):\r\n    result = False\r\n    for i in range(2,int(math.sqrt(n)) + 1):\r\n        if n % i == 0:\r\n            result = True\r\n    return result",
+    "task_id": 3,
+    "test_setup_code": "",
+    "test_list": [
+      "assert is_not_prime(2) == False",
+      "assert is_not_prime(10) == True",
+      "assert is_not_prime(35) == True"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 2
+  },
+  {
+    "text": "Write a python function to find the largest prime factor of a given number.",
+    "code": "import math \r\ndef max_Prime_Factors (n): \r\n    maxPrime = -1 \r\n    while n%2 == 0: \r\n        maxPrime = 2\r\n        n >>= 1    \r\n    for i in range(3,int(math.sqrt(n))+1,2): \r\n        while n % i == 0: \r\n            maxPrime = i \r\n            n = n / i \r\n    if n > 2: \r\n        maxPrime = n  \r\n    return int(maxPrime)",
+    "task_id": 32,
+    "test_setup_code": "",
+    "test_list": [
+      "assert max_Prime_Factors(15) == 5",
+      "assert max_Prime_Factors(6) == 3",
+      "assert max_Prime_Factors(2) == 2"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 31
+  },
+  {
+    "text": "Write a function to find t-nth term of geometric series.",
+    "code": "import math\r\ndef tn_gp(a,n,r):\r\n  tn = a * (math.pow(r, n - 1))\r\n  return tn",
+    "task_id": 55,
+    "test_setup_code": "",
+    "test_list": [
+      "assert tn_gp(1,5,2)==16",
+      "assert tn_gp(1,5,4)==256",
+      "assert tn_gp(2,6,3)==486"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 54
+  },
+  {
+    "text": "Write a function to sort a list of tuples using lambda.",
+    "code": "def subject_marks(subjectmarks):\r\n#subject_marks = [('English', 88), ('Science', 90), ('Maths', 97), ('Social sciences', 82)])\r\n subjectmarks.sort(key = lambda x: x[1])\r\n return subjectmarks",
+    "task_id": 64,
+    "test_setup_code": "",
+    "test_list": [
+      "assert subject_marks([('English', 88), ('Science', 90), ('Maths', 97), ('Social sciences', 82)])==[('Social sciences', 82), ('English', 88), ('Science', 90), ('Maths', 97)]",
+      "assert subject_marks([('Telugu',49),('Hindhi',54),('Social',33)])==([('Social',33),('Telugu',49),('Hindhi',54)])",
+      "assert subject_marks([('Physics',96),('Chemistry',97),('Biology',45)])==([('Biology',45),('Physics',96),('Chemistry',97)])"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 63
+  },
+  {
+    "text": "Write a function to sort a list of elements using comb sort.",
+    "code": "def comb_sort(nums):\r\n    shrink_fact = 1.3\r\n    gaps = len(nums)\r\n    swapped = True\r\n    i = 0\r\n    while gaps > 1 or swapped:\r\n        gaps = int(float(gaps) / shrink_fact)\r\n        swapped = False\r\n        i = 0\r\n        while gaps + i < len(nums):\r\n            if nums[i] > nums[i+gaps]:\r\n                nums[i], nums[i+gaps] = nums[i+gaps], nums[i]\r\n                swapped = True\r\n            i += 1\r\n    return nums",
+    "task_id": 71,
+    "test_setup_code": "",
+    "test_list": [
+      "assert comb_sort([5, 15, 37, 25, 79]) == [5, 15, 25, 37, 79]",
+      "assert comb_sort([41, 32, 15, 19, 22]) == [15, 19, 22, 32, 41]",
+      "assert comb_sort([99, 15, 13, 47]) == [13, 15, 47, 99]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 70
+  },
+  {
+    "text": "Write a function to split the given string with multiple delimiters by using regex.",
+    "code": "import re\r\ndef multiple_split(text):\r\n  return (re.split('; |, |\\*|\\n',text))",
+    "task_id": 73,
+    "test_setup_code": "",
+    "test_list": [
+      "assert multiple_split('Forces of the \\ndarkness*are coming into the play.') == ['Forces of the ', 'darkness', 'are coming into the play.']",
+      "assert multiple_split('Mi Box runs on the \\n Latest android*which has google assistance and chromecast.') == ['Mi Box runs on the ', ' Latest android', 'which has google assistance and chromecast.']",
+      "assert multiple_split('Certain services\\nare subjected to change*over the seperate subscriptions.') == ['Certain services', 'are subjected to change', 'over the seperate subscriptions.']"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 72
+  },
+  {
+    "text": "Write a function to find the volume of a sphere.",
+    "code": "import math\r\ndef volume_sphere(r):\r\n  volume=(4/3)*math.pi*r*r*r\r\n  return volume",
+    "task_id": 82,
+    "test_setup_code": "",
+    "test_list": [
+      "assert volume_sphere(10)==4188.790204786391",
+      "assert volume_sphere(25)==65449.84694978735",
+      "assert volume_sphere(20)==33510.32163829113"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 81
+  },
+  {
+    "text": "Write a function to find the surface area of a sphere.",
+    "code": "import math\r\ndef surfacearea_sphere(r):\r\n  surfacearea=4*math.pi*r*r\r\n  return surfacearea",
+    "task_id": 85,
+    "test_setup_code": "",
+    "test_list": [
+      "assert surfacearea_sphere(10)==1256.6370614359173",
+      "assert surfacearea_sphere(15)==2827.4333882308138",
+      "assert surfacearea_sphere(20)==5026.548245743669"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 84
+  },
+  {
+    "text": "Write a function to merge three dictionaries into a single expression.",
+    "code": "import collections as ct\r\ndef merge_dictionaries_three(dict1,dict2, dict3):\r\n    merged_dict = dict(ct.ChainMap({},dict1,dict2,dict3))\r\n    return merged_dict",
+    "task_id": 87,
+    "test_setup_code": "",
+    "test_list": [
+      "assert merge_dictionaries_three({ \"R\": \"Red\", \"B\": \"Black\", \"P\": \"Pink\" }, { \"G\": \"Green\", \"W\": \"White\" },{ \"O\": \"Orange\", \"W\": \"White\", \"B\": \"Black\" })=={'B': 'Black', 'R': 'Red', 'P': 'Pink', 'G': 'Green', 'W': 'White', 'O': 'Orange'}",
+      "assert merge_dictionaries_three({ \"R\": \"Red\", \"B\": \"Black\", \"P\": \"Pink\" }, { \"G\": \"Green\", \"W\": \"White\" },{\"L\":\"lavender\",\"B\":\"Blue\"})=={'W': 'White', 'P': 'Pink', 'B': 'Black', 'R': 'Red', 'G': 'Green', 'L': 'lavender'}",
+      "assert merge_dictionaries_three({ \"R\": \"Red\", \"B\": \"Black\", \"P\": \"Pink\" },{\"L\":\"lavender\",\"B\":\"Blue\"},{ \"G\": \"Green\", \"W\": \"White\" })=={'B': 'Black', 'P': 'Pink', 'R': 'Red', 'G': 'Green', 'L': 'lavender', 'W': 'White'}"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 86
+  },
+  {
+    "text": "Write a function to convert all possible convertible elements in the list to float.",
+    "code": "def list_to_float(test_list):\r\n  res = []\r\n  for tup in test_list:\r\n    temp = []\r\n    for ele in tup:\r\n      if ele.isalpha():\r\n        temp.append(ele)\r\n      else:\r\n        temp.append(float(ele))\r\n    res.append((temp[0],temp[1])) \r\n  return (str(res)) ",
+    "task_id": 117,
+    "test_setup_code": "",
+    "test_list": [
+      "assert list_to_float( [(\"3\", \"4\"), (\"1\", \"26.45\"), (\"7.32\", \"8\"), (\"4\", \"8\")] ) == '[(3.0, 4.0), (1.0, 26.45), (7.32, 8.0), (4.0, 8.0)]'",
+      "assert list_to_float( [(\"4\", \"4\"), (\"2\", \"27\"), (\"4.12\", \"9\"), (\"7\", \"11\")] ) == '[(4.0, 4.0), (2.0, 27.0), (4.12, 9.0), (7.0, 11.0)]'",
+      "assert list_to_float( [(\"6\", \"78\"), (\"5\", \"26.45\"), (\"1.33\", \"4\"), (\"82\", \"13\")] ) == '[(6.0, 78.0), (5.0, 26.45), (1.33, 4.0), (82.0, 13.0)]'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 116
+  },
+  {
+    "text": "Write a function to sum all amicable numbers from 1 to a specified number.",
+    "code": "def amicable_numbers_sum(limit):\r\n    if not isinstance(limit, int):\r\n        return \"Input is not an integer!\"\r\n    if limit < 1:\r\n        return \"Input must be bigger than 0!\"\r\n    amicables = set()\r\n    for num in range(2, limit+1):\r\n        if num in amicables:\r\n            continue\r\n        sum_fact = sum([fact for fact in range(1, num) if num % fact == 0])\r\n        sum_fact2 = sum([fact for fact in range(1, sum_fact) if sum_fact % fact == 0])\r\n        if num == sum_fact2 and num != sum_fact:\r\n            amicables.add(num)\r\n            amicables.add(sum_fact2)\r\n    return sum(amicables)",
+    "task_id": 123,
+    "test_setup_code": "",
+    "test_list": [
+      "assert amicable_numbers_sum(999)==504",
+      "assert amicable_numbers_sum(9999)==31626",
+      "assert amicable_numbers_sum(99)==0"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 122
+  },
+  {
+    "text": "Write a function to get the angle of a complex number.",
+    "code": "import cmath\r\ndef angle_complex(a,b):\r\n  cn=complex(a,b)\r\n  angle=cmath.phase(a+b)\r\n  return angle",
+    "task_id": 124,
+    "test_setup_code": "",
+    "test_list": [
+      "assert angle_complex(0,1j)==1.5707963267948966 ",
+      "assert angle_complex(2,1j)==0.4636476090008061",
+      "assert angle_complex(0,2j)==1.5707963267948966"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 123
+  },
+  {
+    "text": "Write a function to calculate magic square.",
+    "code": "def magic_square_test(my_matrix):\r\n    iSize = len(my_matrix[0])\r\n    sum_list = []\r\n    sum_list.extend([sum (lines) for lines in my_matrix])   \r\n    for col in range(iSize):\r\n        sum_list.append(sum(row[col] for row in my_matrix))\r\n    result1 = 0\r\n    for i in range(0,iSize):\r\n        result1 +=my_matrix[i][i]\r\n    sum_list.append(result1)      \r\n    result2 = 0\r\n    for i in range(iSize-1,-1,-1):\r\n        result2 +=my_matrix[i][i]\r\n    sum_list.append(result2)\r\n    if len(set(sum_list))>1:\r\n        return False\r\n    return True",
+    "task_id": 129,
+    "test_setup_code": "",
+    "test_list": [
+      "assert magic_square_test([[7, 12, 1, 14], [2, 13, 8, 11], [16, 3, 10, 5], [9, 6, 15, 4]])==True",
+      "assert magic_square_test([[2, 7, 6], [9, 5, 1], [4, 3, 8]])==True",
+      "assert magic_square_test([[2, 7, 6], [9, 5, 1], [4, 3, 7]])==False"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 128
+  },
+  {
+    "text": "Write a function to calculate the sum of the negative numbers of a given list of numbers using lambda function.",
+    "code": "def sum_negativenum(nums):\r\n  sum_negativenum = list(filter(lambda nums:nums<0,nums))\r\n  return sum(sum_negativenum)",
+    "task_id": 133,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_negativenum([2, 4, -6, -9, 11, -12, 14, -5, 17])==-32",
+      "assert sum_negativenum([10,15,-14,13,-18,12,-20])==-52",
+      "assert sum_negativenum([19, -65, 57, 39, 152,-639, 121, 44, 90, -190])==-894"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 132
+  },
+  {
+    "text": "Write a function to find the circumference of a circle.",
+    "code": "def circle_circumference(r):\r\n  perimeter=2*3.1415*r\r\n  return perimeter",
+    "task_id": 139,
+    "test_setup_code": "",
+    "test_list": [
+      "assert circle_circumference(10)==62.830000000000005",
+      "assert circle_circumference(5)==31.415000000000003",
+      "assert circle_circumference(4)==25.132"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 138
+  },
+  {
+    "text": "Write a function to find number of lists present in the given tuple.",
+    "code": "def find_lists(Input): \r\n\tif isinstance(Input, list): \r\n\t\treturn 1\r\n\telse: \r\n\t\treturn len(Input) ",
+    "task_id": 143,
+    "test_setup_code": "",
+    "test_list": [
+      "assert find_lists(([1, 2, 3, 4], [5, 6, 7, 8])) == 2",
+      "assert find_lists(([1, 2], [3, 4], [5, 6]))  == 3",
+      "assert find_lists(([9, 8, 7, 6, 5, 4, 3, 2, 1])) == 1"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 142
+  },
+  {
+    "text": "Write a function to find the vertex of a parabola.",
+    "code": "def parabola_vertex(a, b, c): \r\n  vertex=(((-b / (2 * a)),(((4 * a * c) - (b * b)) / (4 * a))))\r\n  return vertex",
+    "task_id": 153,
+    "test_setup_code": "",
+    "test_list": [
+      "assert parabola_vertex(5,3,2)==(-0.3, 1.55)",
+      "assert parabola_vertex(9,8,4)==(-0.4444444444444444, 2.2222222222222223)",
+      "assert parabola_vertex(2,4,6)==(-1.0, 4.0)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 152
+  },
+  {
+    "text": "Write a function to calculate the sum of the positive integers of n+(n-2)+(n-4)... (until n-x =< 0).",
+    "code": "def sum_series(n):\r\n  if n < 1:\r\n    return 0\r\n  else:\r\n    return n + sum_series(n - 2)",
+    "task_id": 162,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_series(6)==12",
+      "assert sum_series(10)==30",
+      "assert sum_series(9)==25"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 161
+  },
+  {
+    "text": "Write a function to calculate the area of a regular polygon.",
+    "code": "from math import tan, pi\r\ndef area_polygon(s,l):\r\n  area = s * (l ** 2) / (4 * tan(pi / s))\r\n  return area",
+    "task_id": 163,
+    "test_setup_code": "",
+    "test_list": [
+      "assert area_polygon(4,20)==400.00000000000006",
+      "assert area_polygon(10,15)==1731.1969896610804",
+      "assert area_polygon(9,7)==302.90938549487214"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 162
+  },
+  {
+    "text": "Write a python function to check whether the sum of divisors are same or not.",
+    "code": "import math \r\ndef divSum(n): \r\n    sum = 1; \r\n    i = 2; \r\n    while(i * i <= n): \r\n        if (n % i == 0): \r\n            sum = (sum + i +math.floor(n / i)); \r\n        i += 1; \r\n    return sum; \r\ndef areEquivalent(num1,num2): \r\n    return divSum(num1) == divSum(num2); ",
+    "task_id": 164,
+    "test_setup_code": "",
+    "test_list": [
+      "assert areEquivalent(36,57) == False",
+      "assert areEquivalent(2,4) == False",
+      "assert areEquivalent(23,47) == True"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 163
+  },
+  {
+    "text": "Write a function to calculate distance between two points using latitude and longitude.",
+    "code": "from math import radians, sin, cos, acos\r\ndef distance_lat_long(slat,slon,elat,elon):\r\n dist = 6371.01 * acos(sin(slat)*sin(elat) + cos(slat)*cos(elat)*cos(slon - elon))\r\n return dist",
+    "task_id": 180,
+    "test_setup_code": "",
+    "test_list": [
+      "assert distance_lat_long(23.5,67.5,25.5,69.5)==12179.372041317429",
+      "assert distance_lat_long(10.5,20.5,30.5,40.5)==6069.397933300514",
+      "assert distance_lat_long(10,20,30,40)==6783.751974994595"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 179
+  },
+  {
+    "text": "Write a function to find the focus of a parabola.",
+    "code": "def parabola_focus(a, b, c): \r\n  focus= (((-b / (2 * a)),(((4 * a * c) - (b * b) + 1) / (4 * a))))\r\n  return focus",
+    "task_id": 185,
+    "test_setup_code": "",
+    "test_list": [
+      "assert parabola_focus(5,3,2)==(-0.3, 1.6)",
+      "assert parabola_focus(9,8,4)==(-0.4444444444444444, 2.25)",
+      "assert parabola_focus(2,4,6)==(-1.0, 4.125)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 184
+  },
+  {
+    "text": "Write a function to find the largest triangle that can be inscribed in an ellipse.",
+    "code": "import math\r\ndef largest_triangle(a,b): \r\n    if (a < 0 or b < 0): \r\n        return -1 \r\n    area = (3 * math.sqrt(3) * pow(a, 2)) / (4 * b);  \r\n    return area ",
+    "task_id": 198,
+    "test_setup_code": "",
+    "test_list": [
+      "assert largest_triangle(4,2)==10.392304845413264",
+      "assert largest_triangle(5,7)==4.639421805988064",
+      "assert largest_triangle(9,1)==105.2220865598093"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 197
+  },
+  {
+    "text": "Write a function to check the given decimal with a precision of 2 by using regex.",
+    "code": "import re\r\ndef is_decimal(num):\r\n  num_fetch = re.compile(r\"\"\"^[0-9]+(\\.[0-9]{1,2})?$\"\"\")\r\n  result = num_fetch.search(num)\r\n  return bool(result)",
+    "task_id": 208,
+    "test_setup_code": "",
+    "test_list": [
+      "assert is_decimal('123.11') == True",
+      "assert is_decimal('0.21') == True",
+      "assert is_decimal('123.1214') == False"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 207
+  },
+  {
+    "text": "Write a function to convert radians to degrees.",
+    "code": "import math\r\ndef degree_radian(radian):\r\n degree = radian*(180/math.pi)\r\n return degree",
+    "task_id": 214,
+    "test_setup_code": "",
+    "test_list": [
+      "assert degree_radian(90)==5156.620156177409",
+      "assert degree_radian(60)==3437.746770784939",
+      "assert degree_radian(120)==6875.493541569878"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 213
+  },
+  {
+    "text": "Write a function to decode a run-length encoded given list.",
+    "code": "def decode_list(alist):\r\n    def aux(g):\r\n        if isinstance(g, list):\r\n            return [(g[1], range(g[0]))]\r\n        else:\r\n            return [(g, [0])]\r\n    return [x for g in alist for x, R in aux(g) for i in R]",
+    "task_id": 215,
+    "test_setup_code": "",
+    "test_list": [
+      "assert decode_list([[2, 1], 2, 3, [2, 4], 5,1])==[1,1,2,3,4,4,5,1]",
+      "assert decode_list(['a', 'u', 't', 'o', 'm', 'a', 't', 'i', 'c', 'a', [2, 'l'], 'y'])==['a', 'u', 't', 'o', 'm', 'a', 't', 'i', 'c', 'a', 'l', 'l', 'y']",
+      "assert decode_list(['p', 'y', 't', 'h', 'o', 'n'])==['p', 'y', 't', 'h', 'o', 'n']"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 214
+  },
+  {
+    "text": "Write a python function to find the minimum operations required to make two numbers equal.",
+    "code": "import math   \r\ndef min_Operations(A,B):  \r\n    if (A > B): \r\n        swap(A,B)  \r\n    B = B // math.gcd(A,B);  \r\n    return B - 1",
+    "task_id": 218,
+    "test_setup_code": "",
+    "test_list": [
+      "assert min_Operations(2,4) == 1",
+      "assert min_Operations(4,10) == 4",
+      "assert min_Operations(1,4) == 3"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 217
+  },
+  {
+    "text": "Write a function to check if all the elements in tuple have same data type or not.",
+    "code": "def check_type(test_tuple):\r\n  res = True\r\n  for ele in test_tuple:\r\n    if not isinstance(ele, type(test_tuple[0])):\r\n      res = False\r\n      break\r\n  return (res) ",
+    "task_id": 222,
+    "test_setup_code": "",
+    "test_list": [
+      "assert check_type((5, 6, 7, 3, 5, 6) ) == True",
+      "assert check_type((1, 2, \"4\") ) == False",
+      "assert check_type((3, 2, 1, 4, 5) ) == True"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 221
+  },
+  {
+    "text": "Write a function to find the lateral surface area of a cylinder.",
+    "code": "def lateralsuface_cylinder(r,h):\r\n  lateralsurface= 2*3.1415*r*h\r\n  return lateralsurface",
+    "task_id": 233,
+    "test_setup_code": "",
+    "test_list": [
+      "assert lateralsuface_cylinder(10,5)==314.15000000000003",
+      "assert lateralsuface_cylinder(4,5)==125.66000000000001",
+      "assert lateralsuface_cylinder(4,10)==251.32000000000002"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 232
+  },
+  {
+    "text": "Write a python function to find the next perfect square greater than a given number.",
+    "code": "import math  \r\ndef next_Perfect_Square(N): \r\n    nextN = math.floor(math.sqrt(N)) + 1\r\n    return nextN * nextN ",
+    "task_id": 244,
+    "test_setup_code": "",
+    "test_list": [
+      "assert next_Perfect_Square(35) == 36",
+      "assert next_Perfect_Square(6) == 9",
+      "assert next_Perfect_Square(9) == 16"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 243
+  },
+  {
+    "text": "Write a function for computing square roots using the babylonian method.",
+    "code": "def babylonian_squareroot(number):\r\n    if(number == 0):\r\n        return 0;\r\n    g = number/2.0;\r\n    g2 = g + 1;\r\n    while(g != g2):\r\n        n = number/ g;\r\n        g2 = g;\r\n        g = (g + n)/2;\r\n    return g;",
+    "task_id": 246,
+    "test_setup_code": "",
+    "test_list": [
+      "assert babylonian_squareroot(10)==3.162277660168379",
+      "assert babylonian_squareroot(2)==1.414213562373095",
+      "assert babylonian_squareroot(9)==3.0"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 245
+  },
+  {
+    "text": "Write a function to calculate the harmonic sum of n-1.",
+    "code": "def harmonic_sum(n):\r\n  if n < 2:\r\n    return 1\r\n  else:\r\n    return 1 / n + (harmonic_sum(n - 1)) ",
+    "task_id": 248,
+    "test_setup_code": "",
+    "test_list": [
+      "assert harmonic_sum(7) == 2.5928571428571425",
+      "assert harmonic_sum(4) == 2.083333333333333",
+      "assert harmonic_sum(19) == 3.547739657143682"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 247
+  },
+  {
+    "text": "Write a python function to convert complex numbers to polar coordinates.",
+    "code": "import cmath  \r\ndef convert(numbers):    \r\n  num = cmath.polar(numbers)  \r\n  return (num) ",
+    "task_id": 252,
+    "test_setup_code": "",
+    "test_list": [
+      "assert convert(1) == (1.0, 0.0)",
+      "assert convert(4) == (4.0,0.0)",
+      "assert convert(5) == (5.0,0.0)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 251
+  },
+  {
+    "text": "Write a python function to count integers from a given list.",
+    "code": "def count_integer(list1):\r\n    ctr = 0\r\n    for i in list1:\r\n        if isinstance(i, int):\r\n            ctr = ctr + 1\r\n    return ctr",
+    "task_id": 253,
+    "test_setup_code": "",
+    "test_list": [
+      "assert count_integer([1,2,'abc',1.2]) == 2",
+      "assert count_integer([1,2,3]) == 3",
+      "assert count_integer([1,1.2,4,5.1]) == 2"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 252
+  },
+  {
+    "text": "Write a function to find the volume of a cylinder.",
+    "code": "def volume_cylinder(r,h):\r\n  volume=3.1415*r*r*h\r\n  return volume",
+    "task_id": 276,
+    "test_setup_code": "",
+    "test_list": [
+      "assert volume_cylinder(10,5)==1570.7500000000002",
+      "assert volume_cylinder(4,5)==251.32000000000002",
+      "assert volume_cylinder(4,10)==502.64000000000004"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 275
+  },
+  {
+    "text": "Write a function to find the element count that occurs before the record in the given tuple.",
+    "code": "def count_first_elements(test_tup):\r\n  for count, ele in enumerate(test_tup):\r\n    if isinstance(ele, tuple):\r\n      break\r\n  return (count) ",
+    "task_id": 278,
+    "test_setup_code": "",
+    "test_list": [
+      "assert count_first_elements((1, 5, 7, (4, 6), 10) ) == 3",
+      "assert count_first_elements((2, 9, (5, 7), 11) ) == 2",
+      "assert count_first_elements((11, 15, 5, 8, (2, 3), 8) ) == 4"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 277
+  },
+  {
+    "text": "Write a function to find the third side of a right angled triangle.",
+    "code": "import math\r\ndef otherside_rightangle(w,h):\r\n  s=math.sqrt((w*w)+(h*h))\r\n  return s",
+    "task_id": 293,
+    "test_setup_code": "",
+    "test_list": [
+      "assert otherside_rightangle(7,8)==10.63014581273465",
+      "assert otherside_rightangle(3,4)==5",
+      "assert otherside_rightangle(7,15)==16.55294535724685"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 292
+  },
+  {
+    "text": "Write a function to find the maximum value in a given heterogeneous list.",
+    "code": "def max_val(listval):\r\n     max_val = max(i for i in listval if isinstance(i, int)) \r\n     return(max_val)",
+    "task_id": 294,
+    "test_setup_code": "",
+    "test_list": [
+      "assert max_val(['Python', 3, 2, 4, 5, 'version'])==5",
+      "assert max_val(['Python', 15, 20, 25])==25",
+      "assert max_val(['Python', 30, 20, 40, 50, 'version'])==50"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 293
+  },
+  {
+    "text": "Write a function to flatten a given nested list structure.",
+    "code": "def flatten_list(list1):\r\n    result_list = []\r\n    if not list1: return result_list\r\n    stack = [list(list1)]\r\n    while stack:\r\n        c_num = stack.pop()\r\n        next = c_num.pop()\r\n        if c_num: stack.append(c_num)\r\n        if isinstance(next, list):\r\n            if next: stack.append(list(next))\r\n        else: result_list.append(next)\r\n    result_list.reverse()\r\n    return result_list ",
+    "task_id": 297,
+    "test_setup_code": "",
+    "test_list": [
+      "assert flatten_list([0, 10, [20, 30], 40, 50, [60, 70, 80], [90, 100, 110, 120]])==[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]",
+      "assert flatten_list([[10, 20], [40], [30, 56, 25], [10, 20], [33], [40]])==[10, 20, 40, 30, 56, 25, 10, 20, 33, 40]",
+      "assert flatten_list([[1,2,3], [4,5,6], [10,11,12], [7,8,9]])==[1, 2, 3, 4, 5, 6, 10, 11, 12, 7, 8, 9]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 296
+  },
+  {
+    "text": "Write a function to find the depth of a dictionary.",
+    "code": "def dict_depth(d):\r\n    if isinstance(d, dict):\r\n        return 1 + (max(map(dict_depth, d.values())) if d else 0)\r\n    return 0",
+    "task_id": 301,
+    "test_setup_code": "",
+    "test_list": [
+      "assert dict_depth({'a':1, 'b': {'c': {'d': {}}}})==4",
+      "assert dict_depth({'a':1, 'b': {'c':'python'}})==2",
+      "assert dict_depth({1: 'Sun', 2: {3: {4:'Mon'}}})==3"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 300
+  },
+  {
+    "text": "Write a function to find the volume of a cone.",
+    "code": "import math\r\ndef volume_cone(r,h):\r\n  volume = (1.0/3) * math.pi * r * r * h\r\n  return volume",
+    "task_id": 312,
+    "test_setup_code": "",
+    "test_list": [
+      "assert volume_cone(5,12)==314.15926535897927",
+      "assert volume_cone(10,15)==1570.7963267948965",
+      "assert volume_cone(19,17)==6426.651371693521"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 311
+  },
+  {
+    "text": "Write a python function to check whether one root of the quadratic equation is twice of the other or not.",
+    "code": "def Check_Solution(a,b,c): \r\n    if (2*b*b == 9*a*c): \r\n        return (\"Yes\"); \r\n    else: \r\n        return (\"No\"); ",
+    "task_id": 359,
+    "test_setup_code": "",
+    "test_list": [
+      "assert Check_Solution(1,3,2) == \"Yes\"",
+      "assert Check_Solution(1,2,3) == \"No\"",
+      "assert Check_Solution(1,-5,6) == \"No\""
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 358
+  },
+  {
+    "text": "Write a function to find the maximum sum possible by using the given equation f(n) = max( (f(n/2) + f(n/3) + f(n/4) + f(n/5)), n).",
+    "code": "def get_max_sum (n):\r\n\tres = list()\r\n\tres.append(0)\r\n\tres.append(1)\r\n\ti = 2\r\n\twhile i<n + 1:\r\n\t\tres.append(max(i, (res[int(i / 2)] \r\n\t\t\t\t\t\t+ res[int(i / 3)] +\r\n\t\t\t\t\t\t\tres[int(i / 4)]\r\n\t\t\t\t\t\t+ res[int(i / 5)])))\r\n\t\ti = i + 1\r\n\treturn res[n]",
+    "task_id": 392,
+    "test_setup_code": "",
+    "test_list": [
+      "assert get_max_sum(60) == 106",
+      "assert get_max_sum(10) == 12",
+      "assert get_max_sum(2) == 2"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 391
+  },
+  {
+    "text": "Write a function to check whether the given string starts and ends with the same character or not using regex.",
+    "code": "import re  \r\nregex = r'^[a-z]$|^([a-z]).*\\1$'\r\ndef check_char(string): \r\n\tif(re.search(regex, string)): \r\n\t\treturn \"Valid\" \r\n\telse: \r\n\t\treturn \"Invalid\" ",
+    "task_id": 396,
+    "test_setup_code": "",
+    "test_list": [
+      "assert check_char(\"abba\") == \"Valid\"",
+      "assert check_char(\"a\") == \"Valid\"",
+      "assert check_char(\"abcd\") == \"Invalid\""
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 395
+  },
+  {
+    "text": "Write a function to find the minimum value in a given heterogeneous list.",
+    "code": "def min_val(listval):\r\n     min_val = min(i for i in listval if isinstance(i, int))\r\n     return min_val",
+    "task_id": 410,
+    "test_setup_code": "",
+    "test_list": [
+      "assert min_val(['Python', 3, 2, 4, 5, 'version'])==2",
+      "assert min_val(['Python', 15, 20, 25])==15",
+      "assert min_val(['Python', 30, 20, 40, 50, 'version'])==20"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 409
+  },
+  {
+    "text": "Write a python function to find the sum of even factors of a number.",
+    "code": "import math \r\ndef sumofFactors(n) : \r\n    if (n % 2 != 0) : \r\n        return 0\r\n    res = 1\r\n    for i in range(2, (int)(math.sqrt(n)) + 1) :    \r\n        count = 0\r\n        curr_sum = 1\r\n        curr_term = 1\r\n        while (n % i == 0) : \r\n            count= count + 1\r\n            n = n // i \r\n            if (i == 2 and count == 1) : \r\n                curr_sum = 0\r\n            curr_term = curr_term * i \r\n            curr_sum = curr_sum + curr_term \r\n        res = res * curr_sum  \r\n    if (n >= 2) : \r\n        res = res * (1 + n) \r\n    return res ",
+    "task_id": 453,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sumofFactors(18) == 26",
+      "assert sumofFactors(30) == 48",
+      "assert sumofFactors(6) == 8"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 452
+  },
+  {
+    "text": "Write a function to sort counter by value.",
+    "code": "from collections import Counter\r\ndef sort_counter(dict1):\r\n x = Counter(dict1)\r\n sort_counter=x.most_common()\r\n return sort_counter",
+    "task_id": 475,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sort_counter({'Math':81, 'Physics':83, 'Chemistry':87})==[('Chemistry', 87), ('Physics', 83), ('Math', 81)]",
+      "assert sort_counter({'Math':400, 'Physics':300, 'Chemistry':250})==[('Math', 400), ('Physics', 300), ('Chemistry', 250)]",
+      "assert sort_counter({'Math':900, 'Physics':1000, 'Chemistry':1250})==[('Chemistry', 1250), ('Physics', 1000), ('Math', 900)]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 474
+  },
+  {
+    "text": "Write a function to compute binomial probability for the given number.",
+    "code": "def nCr(n, r): \r\n\tif (r > n / 2): \r\n\t\tr = n - r \r\n\tanswer = 1 \r\n\tfor i in range(1, r + 1): \r\n\t\tanswer *= (n - r + i) \r\n\t\tanswer /= i \r\n\treturn answer \r\ndef binomial_probability(n, k, p): \r\n\treturn (nCr(n, k) * pow(p, k) *\tpow(1 - p, n - k)) ",
+    "task_id": 486,
+    "test_setup_code": "",
+    "test_list": [
+      "assert binomial_probability(10, 5, 1.0/3) == 0.13656454808718185",
+      "assert binomial_probability(11, 6, 2.0/4) == 0.2255859375",
+      "assert binomial_probability(12, 7, 3.0/5) == 0.227030335488"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 485
+  },
+  {
+    "text": "Write a function to find the area of a pentagon.",
+    "code": "import math\r\ndef area_pentagon(a):\r\n  area=(math.sqrt(5*(5+2*math.sqrt(5)))*pow(a,2))/4.0\r\n  return area",
+    "task_id": 488,
+    "test_setup_code": "",
+    "test_list": [
+      "assert area_pentagon(5)==43.01193501472417",
+      "assert area_pentagon(10)==172.0477400588967",
+      "assert area_pentagon(15)==387.10741513251753"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 487
+  },
+  {
+    "text": "Write a function to find the sum of geometric progression series.",
+    "code": "import math\r\ndef sum_gp(a,n,r):\r\n total = (a * (1 - math.pow(r, n ))) / (1- r)\r\n return total",
+    "task_id": 491,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_gp(1,5,2)==31",
+      "assert sum_gp(1,5,4)==341",
+      "assert sum_gp(2,6,3)==728"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 490
+  },
+  {
+    "text": "Write a function to calculate a grid of hexagon coordinates where function returns a list of lists containing 6 tuples of x, y point coordinates.",
+    "code": "import math\r\ndef calculate_polygons(startx, starty, endx, endy, radius):\r\n    sl = (2 * radius) * math.tan(math.pi / 6)\r\n    p = sl * 0.5\r\n    b = sl * math.cos(math.radians(30))\r\n    w = b * 2\r\n    h = 2 * sl   \r\n    startx = startx - w\r\n    starty = starty - h\r\n    endx = endx + w\r\n    endy = endy + h\r\n    origx = startx\r\n    origy = starty\r\n    xoffset = b\r\n    yoffset = 3 * p\r\n    polygons = []\r\n    row = 1\r\n    counter = 0\r\n    while starty < endy:\r\n        if row % 2 == 0:\r\n            startx = origx + xoffset\r\n        else:\r\n            startx = origx\r\n        while startx < endx:\r\n            p1x = startx\r\n            p1y = starty + p\r\n            p2x = startx\r\n            p2y = starty + (3 * p)\r\n            p3x = startx + b\r\n            p3y = starty + h\r\n            p4x = startx + w\r\n            p4y = starty + (3 * p)\r\n            p5x = startx + w\r\n            p5y = starty + p\r\n            p6x = startx + b\r\n            p6y = starty\r\n            poly = [\r\n                (p1x, p1y),\r\n                (p2x, p2y),\r\n                (p3x, p3y),\r\n                (p4x, p4y),\r\n                (p5x, p5y),\r\n                (p6x, p6y),\r\n                (p1x, p1y)]\r\n            polygons.append(poly)\r\n            counter += 1\r\n            startx += w\r\n        starty += yoffset\r\n        row += 1\r\n    return polygons",
+    "task_id": 493,
+    "test_setup_code": "",
+    "test_list": [
+      "assert calculate_polygons(1,1, 4, 4, 3)==[[(-5.0, -4.196152422706632), (-5.0, -0.7320508075688767), (-2.0, 1.0), (1.0, -0.7320508075688767), (1.0, -4.196152422706632), (-2.0, -5.928203230275509), (-5.0, -4.196152422706632)], [(1.0, -4.196152422706632), (1.0, -0.7320508075688767), (4.0, 1.0), (7.0, -0.7320508075688767), (7.0, -4.196152422706632), (4.0, -5.928203230275509), (1.0, -4.196152422706632)], [(7.0, -4.196152422706632), (7.0, -0.7320508075688767), (10.0, 1.0), (13.0, -0.7320508075688767), (13.0, -4.196152422706632), (10.0, -5.928203230275509), (7.0, -4.196152422706632)], [(-2.0, 1.0000000000000004), (-2.0, 4.464101615137755), (1.0, 6.196152422706632), (4.0, 4.464101615137755), (4.0, 1.0000000000000004), (1.0, -0.7320508075688767), (-2.0, 1.0000000000000004)], [(4.0, 1.0000000000000004), (4.0, 4.464101615137755), (7.0, 6.196152422706632), (10.0, 4.464101615137755), (10.0, 1.0000000000000004), (7.0, -0.7320508075688767), (4.0, 1.0000000000000004)], [(-5.0, 6.196152422706632), (-5.0, 9.660254037844387), (-2.0, 11.392304845413264), (1.0, 9.660254037844387), (1.0, 6.196152422706632), (-2.0, 4.464101615137755), (-5.0, 6.196152422706632)], [(1.0, 6.196152422706632), (1.0, 9.660254037844387), (4.0, 11.392304845413264), (7.0, 9.660254037844387), (7.0, 6.196152422706632), (4.0, 4.464101615137755), (1.0, 6.196152422706632)], [(7.0, 6.196152422706632), (7.0, 9.660254037844387), (10.0, 11.392304845413264), (13.0, 9.660254037844387), (13.0, 6.196152422706632), (10.0, 4.464101615137755), (7.0, 6.196152422706632)], [(-2.0, 11.392304845413264), (-2.0, 14.85640646055102), (1.0, 16.588457268119896), (4.0, 14.85640646055102), (4.0, 11.392304845413264), (1.0, 9.660254037844387), (-2.0, 11.392304845413264)], [(4.0, 11.392304845413264), (4.0, 14.85640646055102), (7.0, 16.588457268119896), (10.0, 14.85640646055102), (10.0, 11.392304845413264), (7.0, 9.660254037844387), (4.0, 11.392304845413264)]]",
+      "assert calculate_polygons(5,4,7,9,8)==[[(-11.0, -9.856406460551018), (-11.0, -0.6188021535170058), (-3.0, 4.0), (5.0, -0.6188021535170058), (5.0, -9.856406460551018), (-3.0, -14.475208614068023), (-11.0, -9.856406460551018)], [(5.0, -9.856406460551018), (5.0, -0.6188021535170058), (13.0, 4.0), (21.0, -0.6188021535170058), (21.0, -9.856406460551018), (13.0, -14.475208614068023), (5.0, -9.856406460551018)], [(21.0, -9.856406460551018), (21.0, -0.6188021535170058), (29.0, 4.0), (37.0, -0.6188021535170058), (37.0, -9.856406460551018), (29.0, -14.475208614068023), (21.0, -9.856406460551018)], [(-3.0, 4.0), (-3.0, 13.237604307034012), (5.0, 17.856406460551018), (13.0, 13.237604307034012), (13.0, 4.0), (5.0, -0.6188021535170058), (-3.0, 4.0)], [(13.0, 4.0), (13.0, 13.237604307034012), (21.0, 17.856406460551018), (29.0, 13.237604307034012), (29.0, 4.0), (21.0, -0.6188021535170058), (13.0, 4.0)], [(-11.0, 17.856406460551018), (-11.0, 27.09401076758503), (-3.0, 31.712812921102035), (5.0, 27.09401076758503), (5.0, 17.856406460551018), (-3.0, 13.237604307034012), (-11.0, 17.856406460551018)], [(5.0, 17.856406460551018), (5.0, 27.09401076758503), (13.0, 31.712812921102035), (21.0, 27.09401076758503), (21.0, 17.856406460551018), (13.0, 13.237604307034012), (5.0, 17.856406460551018)], [(21.0, 17.856406460551018), (21.0, 27.09401076758503), (29.0, 31.712812921102035), (37.0, 27.09401076758503), (37.0, 17.856406460551018), (29.0, 13.237604307034012), (21.0, 17.856406460551018)], [(-3.0, 31.712812921102035), (-3.0, 40.95041722813605), (5.0, 45.569219381653056), (13.0, 40.95041722813605), (13.0, 31.712812921102035), (5.0, 27.09401076758503), (-3.0, 31.712812921102035)], [(13.0, 31.712812921102035), (13.0, 40.95041722813605), (21.0, 45.569219381653056), (29.0, 40.95041722813605), (29.0, 31.712812921102035), (21.0, 27.09401076758503), (13.0, 31.712812921102035)]]",
+      "assert calculate_polygons(9,6,4,3,2)==[[(5.0, 2.5358983848622456), (5.0, 4.8452994616207485), (7.0, 6.0), (9.0, 4.8452994616207485), (9.0, 2.5358983848622456), (7.0, 1.3811978464829942), (5.0, 2.5358983848622456)], [(7.0, 6.0), (7.0, 8.309401076758503), (9.0, 9.464101615137753), (11.0, 8.309401076758503), (11.0, 6.0), (9.0, 4.8452994616207485), (7.0, 6.0)]]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 492
+  },
+  {
+    "text": "Write a function to remove lowercase substrings from a given string by using regex.",
+    "code": "import re\r\ndef remove_lowercase(str1):\r\n  remove_lower = lambda text: re.sub('[a-z]', '', text)\r\n  result =  remove_lower(str1)\r\n  return (result)",
+    "task_id": 495,
+    "test_setup_code": "",
+    "test_list": [
+      "assert remove_lowercase('KDeoALOklOOHserfLoAJSIskdsf') == 'KDALOOOHLAJSI'",
+      "assert remove_lowercase('ProducTnamEstreAmIngMediAplAYer') == 'PTEAIMAAY'",
+      "assert remove_lowercase('maNufacTuredbYSheZenTechNolOGIes') == 'NTYSZTNOGI'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 494
+  },
+  {
+    "text": "Write a function to find the surface area of a cone.",
+    "code": "import math\r\ndef surfacearea_cone(r,h):\r\n  l = math.sqrt(r * r + h * h)\r\n  SA = math.pi * r * (r + l)\r\n  return SA",
+    "task_id": 497,
+    "test_setup_code": "",
+    "test_list": [
+      "assert surfacearea_cone(5,12)==282.7433388230814",
+      "assert surfacearea_cone(10,15)==880.5179353159282",
+      "assert surfacearea_cone(19,17)==2655.923961165254"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 496
+  },
+  {
+    "text": "Write a function to count the element frequency in the mixed nested tuple.",
+    "code": "def flatten(test_tuple): \r\n\tfor tup in test_tuple: \r\n\t\tif isinstance(tup, tuple): \r\n\t\t\tyield from flatten(tup) \r\n\t\telse: \r\n\t\t\tyield tup \r\ndef count_element_freq(test_tuple):\r\n  res = {}\r\n  for ele in flatten(test_tuple):\r\n    if ele not in res:\r\n      res[ele] = 0\r\n    res[ele] += 1\r\n  return (res) ",
+    "task_id": 512,
+    "test_setup_code": "",
+    "test_list": [
+      "assert count_element_freq((5, 6, (5, 6), 7, (8, 9), 9) ) == {5: 2, 6: 2, 7: 1, 8: 1, 9: 2}",
+      "assert count_element_freq((6, 7, (6, 7), 8, (9, 10), 10) ) == {6: 2, 7: 2, 8: 1, 9: 1, 10: 2}",
+      "assert count_element_freq((7, 8, (7, 8), 9, (10, 11), 11) ) == {7: 2, 8: 2, 9: 1, 10: 1, 11: 2}"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 511
+  },
+  {
+    "text": "Write a function to find the square root of a perfect number.",
+    "code": "import math\r\ndef sqrt_root(num):\r\n sqrt_root = math.pow(num, 0.5)\r\n return sqrt_root ",
+    "task_id": 518,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sqrt_root(4)==2",
+      "assert sqrt_root(16)==4",
+      "assert sqrt_root(400)==20"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 517
+  },
+  {
+    "text": "Write a function to calculate volume of a tetrahedron.",
+    "code": "import math\r\ndef volume_tetrahedron(num):\r\n\tvolume = (num ** 3 / (6 * math.sqrt(2)))\t\r\n\treturn round(volume, 2)",
+    "task_id": 519,
+    "test_setup_code": "",
+    "test_list": [
+      "assert volume_tetrahedron(10)==117.85",
+      "assert volume_tetrahedron(15)==397.75",
+      "assert volume_tetrahedron(20)==942.81"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 518
+  },
+  {
+    "text": "Write a function to remove particular data type elements from the given tuple.",
+    "code": "def remove_datatype(test_tuple, data_type):\r\n  res = []\r\n  for ele in test_tuple:\r\n    if not isinstance(ele, data_type):\r\n      res.append(ele)\r\n  return (res) ",
+    "task_id": 533,
+    "test_setup_code": "",
+    "test_list": [
+      "assert remove_datatype((4, 5, 4, 7.7, 1.2), int) == [7.7, 1.2]",
+      "assert remove_datatype((7, 8, 9, \"SR\"), str) == [7, 8, 9]",
+      "assert remove_datatype((7, 1.1, 2, 2.2), float) == [7, 2]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 532
+  },
+  {
+    "text": "Write a function to find the top or bottom surface area of a cylinder.",
+    "code": "def topbottom_surfacearea(r):\r\n  toporbottomarea=3.1415*r*r\r\n  return toporbottomarea",
+    "task_id": 535,
+    "test_setup_code": "",
+    "test_list": [
+      "assert topbottom_surfacearea(10)==314.15000000000003",
+      "assert topbottom_surfacearea(5)==78.53750000000001",
+      "assert topbottom_surfacearea(4)==50.264"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 534
+  },
+  {
+    "text": "Write a function to find if the given number is abundant or not.",
+    "code": "import math \r\ndef get_sum(n): \r\n\tsum = 0\r\n\ti = 1\r\n\twhile i <= (math.sqrt(n)): \r\n\t\tif n%i == 0: \r\n\t\t\tif n/i == i : \r\n\t\t\t\tsum = sum + i \r\n\t\t\telse: \r\n\t\t\t\tsum = sum + i \r\n\t\t\t\tsum = sum + (n / i ) \r\n\t\ti = i + 1\r\n\tsum = sum - n \r\n\treturn sum\r\ndef check_abundant(n): \r\n\tif (get_sum(n) > n): \r\n\t\treturn True\r\n\telse: \r\n\t\treturn False",
+    "task_id": 541,
+    "test_setup_code": "",
+    "test_list": [
+      "assert check_abundant(12) == True",
+      "assert check_abundant(15) == False",
+      "assert check_abundant(18) == True"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 540
+  },
+  {
+    "text": "Write a function to replace all occurrences of spaces, commas, or dots with a colon in the given string by using regex.",
+    "code": "import re\r\ndef fill_spaces(text):\r\n  return (re.sub(\"[ ,.]\", \":\", text))",
+    "task_id": 542,
+    "test_setup_code": "",
+    "test_list": [
+      "assert fill_spaces('Boult Curve Wireless Neckband') == 'Boult:Curve:Wireless:Neckband'",
+      "assert fill_spaces('Stereo Sound Sweatproof') == 'Stereo:Sound:Sweatproof'",
+      "assert fill_spaces('Probass Curve Audio') == 'Probass:Curve:Audio'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 541
+  },
+  {
+    "text": "Write a function to convert the given tuple to a floating-point number.",
+    "code": "def tuple_to_float(test_tup):\r\n  res = float('.'.join(str(ele) for ele in test_tup))\r\n  return (res) ",
+    "task_id": 553,
+    "test_setup_code": "",
+    "test_list": [
+      "assert tuple_to_float((4, 56)) == 4.56",
+      "assert tuple_to_float((7, 256)) == 7.256",
+      "assert tuple_to_float((8, 123)) == 8.123"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 552
+  },
+  {
+    "text": "Write a function to find the surface area of a cylinder.",
+    "code": "def surfacearea_cylinder(r,h):\r\n  surfacearea=((2*3.1415*r*r) +(2*3.1415*r*h))\r\n  return surfacearea",
+    "task_id": 574,
+    "test_setup_code": "",
+    "test_list": [
+      "assert surfacearea_cylinder(10,5)==942.45",
+      "assert surfacearea_cylinder(4,5)==226.18800000000002",
+      "assert surfacearea_cylinder(4,10)==351.848"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 573
+  },
+  {
+    "text": "Write a function to extract the even elements in the nested mixed tuple.",
+    "code": "def even_ele(test_tuple, even_fnc): \r\n\tres = tuple() \r\n\tfor ele in test_tuple: \r\n\t\tif isinstance(ele, tuple): \r\n\t\t\tres += (even_ele(ele, even_fnc), ) \r\n\t\telif even_fnc(ele): \r\n\t\t\tres += (ele, ) \r\n\treturn res \r\ndef extract_even(test_tuple):\r\n  res = even_ele(test_tuple, lambda x: x % 2 == 0)\r\n  return (res) ",
+    "task_id": 580,
+    "test_setup_code": "",
+    "test_list": [
+      "assert extract_even((4, 5, (7, 6, (2, 4)), 6, 8)) == (4, (6, (2, 4)), 6, 8)",
+      "assert extract_even((5, 6, (8, 7, (4, 8)), 7, 9)) == (6, (8, (4, 8)))",
+      "assert extract_even((5, 6, (9, 8, (4, 6)), 8, 10)) == (6, (8, (4, 6)), 8, 10)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 579
+  },
+  {
+    "text": "Write a function to find the n - expensive price items from a given dataset using heap queue algorithm.",
+    "code": "import heapq\r\ndef expensive_items(items,n):\r\n  expensive_items = heapq.nlargest(n, items, key=lambda s: s['price'])\r\n  return expensive_items",
+    "task_id": 585,
+    "test_setup_code": "",
+    "test_list": [
+      "assert expensive_items([{'name': 'Item-1', 'price': 101.1},{'name': 'Item-2', 'price': 555.22}],1)==[{'name': 'Item-2', 'price': 555.22}]",
+      "assert expensive_items([{'name': 'Item-1', 'price': 101.1},{'name': 'Item-2', 'price': 555.22}, {'name': 'Item-3', 'price': 45.09}],2)==[{'name': 'Item-2', 'price': 555.22},{'name': 'Item-1', 'price': 101.1}]",
+      "assert expensive_items([{'name': 'Item-1', 'price': 101.1},{'name': 'Item-2', 'price': 555.22}, {'name': 'Item-3', 'price': 45.09},{'name': 'Item-4', 'price': 22.75}],1)==[{'name': 'Item-2', 'price': 555.22}]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 584
+  },
+  {
+    "text": "Write a function to convert polar coordinates to rectangular coordinates.",
+    "code": "import cmath\r\ndef polar_rect(x,y):\r\n cn = complex(x,y)\r\n cn=cmath.polar(cn)\r\n cn1 = cmath.rect(2, cmath.pi)\r\n return (cn,cn1)",
+    "task_id": 590,
+    "test_setup_code": "",
+    "test_list": [
+      "assert polar_rect(3,4)==((5.0, 0.9272952180016122), (-2+2.4492935982947064e-16j))",
+      "assert polar_rect(4,7)==((8.06225774829855, 1.0516502125483738), (-2+2.4492935982947064e-16j))",
+      "assert polar_rect(15,17)==((22.67156809750927, 0.8478169733934057), (-2+2.4492935982947064e-16j))"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 589
+  },
+  {
+    "text": "Write a function to remove leading zeroes from an ip address.",
+    "code": "import re\r\ndef removezero_ip(ip):\r\n string = re.sub('\\.[0]*', '.', ip)\r\n return string\r",
+    "task_id": 593,
+    "test_setup_code": "",
+    "test_list": [
+      "assert removezero_ip(\"216.08.094.196\")==('216.8.94.196') ",
+      "assert removezero_ip(\"12.01.024\")==('12.1.24') ",
+      "assert removezero_ip(\"216.08.094.0196\")==('216.8.94.196') "
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 592
+  },
+  {
+    "text": "Write a function to convert degrees to radians.",
+    "code": "import math\r\ndef radian_degree(degree):\r\n radian = degree*(math.pi/180)\r\n return radian",
+    "task_id": 606,
+    "test_setup_code": "",
+    "test_list": [
+      "assert radian_degree(90)==1.5707963267948966",
+      "assert radian_degree(60)==1.0471975511965976",
+      "assert radian_degree(120)==2.0943951023931953"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 605
+  },
+  {
+    "text": "Write a function to divide two lists using map and lambda function.",
+    "code": "def div_list(nums1,nums2):\r\n  result = map(lambda x, y: x / y, nums1, nums2)\r\n  return list(result)",
+    "task_id": 618,
+    "test_setup_code": "",
+    "test_list": [
+      "assert div_list([4,5,6],[1, 2, 3])==[4.0,2.5,2.0]",
+      "assert div_list([3,2],[1,4])==[3.0, 0.5]",
+      "assert div_list([90,120],[50,70])==[1.8, 1.7142857142857142]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 617
+  },
+  {
+    "text": "Write a python function to check if roots of a quadratic equation are reciprocal of each other or not.",
+    "code": "def Check_Solution(a,b,c): \r\n    if (a == c): \r\n        return (\"Yes\"); \r\n    else: \r\n        return (\"No\"); ",
+    "task_id": 636,
+    "test_setup_code": "",
+    "test_list": [
+      "assert Check_Solution(2,0,2) == \"Yes\"",
+      "assert Check_Solution(2,-5,2) == \"Yes\"",
+      "assert Check_Solution(1,2,3) == \"No\""
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 635
+  },
+  {
+    "text": "Write a function to calculate wind chill index.",
+    "code": "import math\r\ndef wind_chill(v,t):\r\n windchill = 13.12 + 0.6215*t -  11.37*math.pow(v, 0.16) + 0.3965*t*math.pow(v, 0.16)\r\n return int(round(windchill, 0))",
+    "task_id": 638,
+    "test_setup_code": "",
+    "test_list": [
+      "assert wind_chill(120,35)==40",
+      "assert wind_chill(40,70)==86",
+      "assert wind_chill(10,100)==116"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 637
+  },
+  {
+    "text": "Write a python function to find the first digit in factorial of a given number.",
+    "code": "import math \r\ndef first_Digit(n) : \r\n    fact = 1\r\n    for i in range(2,n + 1) : \r\n        fact = fact * i \r\n        while (fact % 10 == 0) :  \r\n            fact = int(fact / 10) \r\n    while (fact >= 10) : \r\n        fact = int(fact / 10) \r\n    return math.floor(fact) ",
+    "task_id": 657,
+    "test_setup_code": "",
+    "test_list": [
+      "assert first_Digit(5) == 1",
+      "assert first_Digit(10) == 3",
+      "assert first_Digit(7) == 5"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 656
+  },
+  {
+    "text": "Write a function to check whether the given ip address is valid or not using regex.",
+    "code": "import re \r\nregex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\.( \r\n\t\t\t25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\.( \r\n\t\t\t25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\.( \r\n\t\t\t25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$'''\r\ndef check_IP(Ip): \r\n\tif(re.search(regex, Ip)): \r\n\t\treturn (\"Valid IP address\") \r\n\telse: \r\n\t\treturn (\"Invalid IP address\") ",
+    "task_id": 669,
+    "test_setup_code": "",
+    "test_list": [
+      "assert check_IP(\"192.168.0.1\") == 'Valid IP address'",
+      "assert check_IP(\"110.234.52.124\") == 'Valid IP address'",
+      "assert check_IP(\"366.1.2.2\") == 'Invalid IP address'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 668
+  },
+  {
+    "text": "Write a python function to set the right most unset bit.",
+    "code": "import math \r\ndef get_Pos_Of_Right_most_Set_Bit(n): \r\n    return int(math.log2(n&-n)+1)   \r\ndef set_Right_most_Unset_Bit(n): \r\n    if (n == 0): \r\n        return 1\r\n    if ((n & (n + 1)) == 0):     \r\n        return n \r\n    pos = get_Pos_Of_Right_most_Set_Bit(~n)      \r\n    return ((1 << (pos - 1)) | n) ",
+    "task_id": 671,
+    "test_setup_code": "",
+    "test_list": [
+      "assert set_Right_most_Unset_Bit(21) == 23",
+      "assert set_Right_most_Unset_Bit(11) == 15",
+      "assert set_Right_most_Unset_Bit(15) == 15"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 670
+  },
+  {
+    "text": "Write a function to access dictionary key’s element by index.",
+    "code": "def access_key(ditionary,key):\r\n  return list(ditionary)[key]",
+    "task_id": 679,
+    "test_setup_code": "",
+    "test_list": [
+      "assert access_key({'physics': 80, 'math': 90, 'chemistry': 86},0)== 'physics'",
+      "assert access_key({'python':10, 'java': 20, 'C++':30},2)== 'C++'",
+      "assert access_key({'program':15,'computer':45},1)== 'computer'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 678
+  },
+  {
+    "text": "Write a function to get the length of a complex number.",
+    "code": "import cmath\r\ndef len_complex(a,b):\r\n  cn=complex(a,b)\r\n  length=abs(cn)\r\n  return length",
+    "task_id": 688,
+    "test_setup_code": "",
+    "test_list": [
+      "assert len_complex(3,4)==5.0",
+      "assert len_complex(9,10)==13.45362404707371",
+      "assert len_complex(7,9)==11.40175425099138"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 687
+  },
+  {
+    "text": "Write a function to remove multiple spaces in a string by using regex.",
+    "code": "import re\r\ndef remove_multiple_spaces(text1):\r\n  return (re.sub(' +',' ',text1))",
+    "task_id": 693,
+    "test_setup_code": "",
+    "test_list": [
+      "assert remove_multiple_spaces('Google      Assistant') == 'Google Assistant'",
+      "assert remove_multiple_spaces('Quad      Core') == 'Quad Core'",
+      "assert remove_multiple_spaces('ChromeCast      Built-in') == 'ChromeCast Built-in'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 692
+  },
+  {
+    "text": "Write a function to calculate the harmonic sum of n-1.",
+    "code": "def harmonic_sum(n):\r\n  if n < 2:\r\n    return 1\r\n  else:\r\n    return 1 / n + (harmonic_sum(n - 1))",
+    "task_id": 704,
+    "test_setup_code": "",
+    "test_list": [
+      "assert harmonic_sum(10)==2.9289682539682538",
+      "assert harmonic_sum(4)==2.083333333333333",
+      "assert harmonic_sum(7)==2.5928571428571425 "
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 703
+  },
+  {
+    "text": "Write a function to calculate the standard deviation.",
+    "code": "import math\r\nimport sys\r\ndef sd_calc(data):\r\n    n = len(data)\r\n    if n <= 1:\r\n        return 0.0\r\n    mean, sd = avg_calc(data), 0.0\r\n    for el in data:\r\n        sd += (float(el) - mean)**2\r\n    sd = math.sqrt(sd / float(n-1))\r\n    return sd\r\ndef avg_calc(ls):\r\n    n, mean = len(ls), 0.0\r\n    if n <= 1:\r\n        return ls[0]\r\n    for el in ls:\r\n        mean = mean + float(el)\r\n    mean = mean / float(n)\r\n    return mean",
+    "task_id": 717,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sd_calc([4, 2, 5, 8, 6])== 2.23606797749979",
+      "assert sd_calc([1,2,3,4,5,6,7])==2.160246899469287",
+      "assert sd_calc([5,9,10,15,6,4])==4.070217029430577"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 716
+  },
+  {
+    "text": "Write a function to find a path with the maximum average over all existing paths for the given square matrix of size n*n.",
+    "code": "M = 100\r\ndef maxAverageOfPath(cost, N): \r\n\tdp = [[0 for i in range(N + 1)] for j in range(N + 1)] \r\n\tdp[0][0] = cost[0][0] \r\n\tfor i in range(1, N): \r\n\t\tdp[i][0] = dp[i - 1][0] + cost[i][0] \r\n\tfor j in range(1, N): \r\n\t\tdp[0][j] = dp[0][j - 1] + cost[0][j] \r\n\tfor i in range(1, N): \r\n\t\tfor j in range(1, N): \r\n\t\t\tdp[i][j] = max(dp[i - 1][j], \r\n\t\t\t\t\t\tdp[i][j - 1]) + cost[i][j] \r\n\treturn dp[N - 1][N - 1] / (2 * N - 1)",
+    "task_id": 721,
+    "test_setup_code": "",
+    "test_list": [
+      "assert maxAverageOfPath([[1, 2, 3], [6, 5, 4], [7, 3, 9]], 3) == 5.2",
+      "assert maxAverageOfPath([[2, 3, 4], [7, 6, 5], [8, 4, 10]], 3) == 6.2",
+      "assert maxAverageOfPath([[3, 4, 5], [8, 7, 6], [9, 5, 11]], 3) == 7.2 "
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 720
+  },
+  {
+    "text": "Write a function to find the lateral surface area of a cone.",
+    "code": "import math\r\ndef lateralsurface_cone(r,h):\r\n  l = math.sqrt(r * r + h * h)\r\n  LSA = math.pi * r  * l\r\n  return LSA",
+    "task_id": 731,
+    "test_setup_code": "",
+    "test_list": [
+      "assert lateralsurface_cone(5,12)==204.20352248333654",
+      "assert lateralsurface_cone(10,15)==566.3586699569488",
+      "assert lateralsurface_cone(19,17)==1521.8090132193388"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 730
+  },
+  {
+    "text": "Write a function to check whether the given string is starting with a vowel or not using regex.",
+    "code": "import re \r\nregex = '^[aeiouAEIOU][A-Za-z0-9_]*'\r\ndef check_str(string): \r\n\tif(re.search(regex, string)): \r\n\t\treturn (\"Valid\") \r\n\telse: \r\n\t\treturn (\"Invalid\") ",
+    "task_id": 737,
+    "test_setup_code": "",
+    "test_list": [
+      "assert check_str(\"annie\") == 'Valid'",
+      "assert check_str(\"dawood\") == 'Invalid'",
+      "assert check_str(\"Else\") == 'Valid'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 736
+  },
+  {
+    "text": "Write a function to calculate the geometric sum of n-1.",
+    "code": "def geometric_sum(n):\r\n  if n < 0:\r\n    return 0\r\n  else:\r\n    return 1 / (pow(2, n)) + geometric_sum(n - 1)",
+    "task_id": 738,
+    "test_setup_code": "",
+    "test_list": [
+      "assert geometric_sum(7) == 1.9921875",
+      "assert geometric_sum(4) == 1.9375",
+      "assert geometric_sum(8) == 1.99609375"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 737
+  },
+  {
+    "text": "Write a python function to find the index of smallest triangular number with n digits.",
+    "code": "import math \r\ndef find_Index(n): \r\n    x = math.sqrt(2 * math.pow(10,(n - 1))); \r\n    return round(x); ",
+    "task_id": 739,
+    "test_setup_code": "",
+    "test_list": [
+      "assert find_Index(2) == 4",
+      "assert find_Index(3) == 14",
+      "assert find_Index(4) == 45"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 738
+  },
+  {
+    "text": "Write a function to caluclate the area of a tetrahedron.",
+    "code": "import math\r\ndef area_tetrahedron(side):\r\n  area = math.sqrt(3)*(side*side)\r\n  return area",
+    "task_id": 742,
+    "test_setup_code": "",
+    "test_list": [
+      "assert area_tetrahedron(3)==15.588457268119894",
+      "assert area_tetrahedron(20)==692.8203230275509",
+      "assert area_tetrahedron(10)==173.20508075688772"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 741
+  },
+  {
+    "text": "Write a function to find area of a sector.",
+    "code": "def sector_area(r,a):\r\n    pi=22/7\r\n    if a >= 360:\r\n        return None\r\n    sectorarea = (pi*r**2) * (a/360)\r\n    return sectorarea",
+    "task_id": 746,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sector_area(4,45)==6.285714285714286",
+      "assert sector_area(9,45)==31.82142857142857",
+      "assert sector_area(9,360)==None"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 745
+  },
+  {
+    "text": "Write a function to check a decimal with a precision of 2.",
+    "code": "def is_decimal(num):\r\n    import re\r\n    dnumre = re.compile(r\"\"\"^[0-9]+(\\.[0-9]{1,2})?$\"\"\")\r\n    result = dnumre.search(num)\r\n    return bool(result)",
+    "task_id": 759,
+    "test_setup_code": "",
+    "test_list": [
+      "assert is_decimal('123.11')==True",
+      "assert is_decimal('e666.86')==False",
+      "assert is_decimal('3.124587')==False"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 758
+  },
+  {
+    "text": "Write a function to caluclate arc length of an angle.",
+    "code": "def arc_length(d,a):\r\n    pi=22/7\r\n    if a >= 360:\r\n        return None\r\n    arclength = (pi*d) * (a/360)\r\n    return arclength",
+    "task_id": 761,
+    "test_setup_code": "",
+    "test_list": [
+      "assert arc_length(9,45)==3.5357142857142856",
+      "assert arc_length(9,480)==None",
+      "assert arc_length(5,270)==11.785714285714285"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 760
+  },
+  {
+    "text": "Write a function to find nth polite number.",
+    "code": "import math \r\ndef is_polite(n): \r\n\tn = n + 1\r\n\treturn (int)(n+(math.log((n + math.log(n, 2)), 2))) ",
+    "task_id": 765,
+    "test_setup_code": "",
+    "test_list": [
+      "assert is_polite(7) == 11",
+      "assert is_polite(4) == 7",
+      "assert is_polite(9) == 13"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 764
+  },
+  {
+    "text": "Write a function to check if the string is a valid email address or not using regex.",
+    "code": "import re \r\nregex = '^[a-z0-9]+[\\._]?[a-z0-9]+[@]\\w+[.]\\w{2,3}$'\r\ndef check_email(email): \r\n\tif(re.search(regex,email)): \r\n\t\treturn (\"Valid Email\") \r\n\telse: \r\n\t\treturn (\"Invalid Email\") ",
+    "task_id": 774,
+    "test_setup_code": "",
+    "test_list": [
+      "assert check_email(\"ankitrai326@gmail.com\") == 'Valid Email'",
+      "assert check_email(\"my.ownsite@ourearth.org\") == 'Valid Email'",
+      "assert check_email(\"ankitaoie326.com\") == 'Invalid Email'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 773
+  },
+  {
+    "text": "Write a python function to check whether the count of divisors is even or odd.",
+    "code": "import math \r\ndef count_Divisors(n) : \r\n    count = 0\r\n    for i in range(1, (int)(math.sqrt(n)) + 2) : \r\n        if (n % i == 0) : \r\n            if( n // i == i) : \r\n                count = count + 1\r\n            else : \r\n                count = count + 2\r\n    if (count % 2 == 0) : \r\n        return (\"Even\") \r\n    else : \r\n        return (\"Odd\") ",
+    "task_id": 781,
+    "test_setup_code": "",
+    "test_list": [
+      "assert count_Divisors(10) == \"Even\"",
+      "assert count_Divisors(100) == \"Odd\"",
+      "assert count_Divisors(125) == \"Even\""
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 780
+  },
+  {
+    "text": "Write a function to convert rgb color to hsv color.",
+    "code": "def rgb_to_hsv(r, g, b):\r\n    r, g, b = r/255.0, g/255.0, b/255.0\r\n    mx = max(r, g, b)\r\n    mn = min(r, g, b)\r\n    df = mx-mn\r\n    if mx == mn:\r\n        h = 0\r\n    elif mx == r:\r\n        h = (60 * ((g-b)/df) + 360) % 360\r\n    elif mx == g:\r\n        h = (60 * ((b-r)/df) + 120) % 360\r\n    elif mx == b:\r\n        h = (60 * ((r-g)/df) + 240) % 360\r\n    if mx == 0:\r\n        s = 0\r\n    else:\r\n        s = (df/mx)*100\r\n    v = mx*100\r\n    return h, s, v",
+    "task_id": 783,
+    "test_setup_code": "",
+    "test_list": [
+      "assert rgb_to_hsv(255, 255, 255)==(0, 0.0, 100.0)",
+      "assert rgb_to_hsv(0, 215, 0)==(120.0, 100.0, 84.31372549019608)",
+      "assert rgb_to_hsv(10, 215, 110)==(149.26829268292684, 95.34883720930233, 84.31372549019608)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 782
+  },
+  {
+    "text": "Write a function to calculate the perimeter of a regular polygon.",
+    "code": "from math import tan, pi\r\ndef perimeter_polygon(s,l):\r\n  perimeter = s*l\r\n  return perimeter",
+    "task_id": 789,
+    "test_setup_code": "",
+    "test_list": [
+      "assert perimeter_polygon(4,20)==80",
+      "assert perimeter_polygon(10,15)==150",
+      "assert perimeter_polygon(9,7)==63"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 788
+  },
+  {
+    "text": "Write a function to remove the nested record from the given tuple.",
+    "code": "def remove_nested(test_tup):\r\n  res = tuple()\r\n  for count, ele in enumerate(test_tup):\r\n    if not isinstance(ele, tuple):\r\n      res = res + (ele, )\r\n  return (res) ",
+    "task_id": 791,
+    "test_setup_code": "",
+    "test_list": [
+      "assert remove_nested((1, 5, 7, (4, 6), 10)) == (1, 5, 7, 10)",
+      "assert remove_nested((2, 6, 8, (5, 7), 11)) == (2, 6, 8, 11)",
+      "assert remove_nested((3, 7, 9, (6, 8), 12)) == (3, 7, 9, 12)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 790
+  },
+  {
+    "text": "Write a function to merge two dictionaries into a single expression.",
+    "code": "import collections as ct\r\ndef merge_dictionaries(dict1,dict2):\r\n    merged_dict = dict(ct.ChainMap({}, dict1, dict2))\r\n    return merged_dict",
+    "task_id": 821,
+    "test_setup_code": "",
+    "test_list": [
+      "assert merge_dictionaries({ \"R\": \"Red\", \"B\": \"Black\", \"P\": \"Pink\" }, { \"G\": \"Green\", \"W\": \"White\" })=={'B': 'Black', 'R': 'Red', 'P': 'Pink', 'G': 'Green', 'W': 'White'}",
+      "assert merge_dictionaries({ \"R\": \"Red\", \"B\": \"Black\", \"P\": \"Pink\" },{ \"O\": \"Orange\", \"W\": \"White\", \"B\": \"Black\" })=={'O': 'Orange', 'P': 'Pink', 'B': 'Black', 'W': 'White', 'R': 'Red'}",
+      "assert merge_dictionaries({ \"G\": \"Green\", \"W\": \"White\" },{ \"O\": \"Orange\", \"W\": \"White\", \"B\": \"Black\" })=={'W': 'White', 'O': 'Orange', 'G': 'Green', 'B': 'Black'}"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 820
+  },
+  {
+    "text": "Write a function to round up a number to specific digits.",
+    "code": "import math\r\ndef round_up(a, digits):\r\n    n = 10**-digits\r\n    return round(math.ceil(a / n) * n, digits)",
+    "task_id": 830,
+    "test_setup_code": "",
+    "test_list": [
+      "assert round_up(123.01247,0)==124",
+      "assert round_up(123.01247,1)==123.1",
+      "assert round_up(123.01247,2)==123.02"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 829
+  },
+  {
+    "text": "Write a python function to check whether the roots of a quadratic equation are numerically equal but opposite in sign or not.",
+    "code": "def Check_Solution(a,b,c):  \r\n    if b == 0:  \r\n        return (\"Yes\")  \r\n    else: \r\n        return (\"No\")  ",
+    "task_id": 840,
+    "test_setup_code": "",
+    "test_list": [
+      "assert Check_Solution(2,0,-1) == \"Yes\"",
+      "assert Check_Solution(1,-5,6) == \"No\"",
+      "assert Check_Solution(2,0,2) == \"Yes\""
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 839
+  },
+  {
+    "text": "Write a python function to count the number of digits in factorial of a given number.",
+    "code": "import math \r\ndef find_Digits(n): \r\n    if (n < 0): \r\n        return 0;\r\n    if (n <= 1): \r\n        return 1; \r\n    x = ((n * math.log10(n / math.e) + math.log10(2 * math.pi * n) /2.0)); \r\n    return math.floor(x) + 1; ",
+    "task_id": 845,
+    "test_setup_code": "",
+    "test_list": [
+      "assert find_Digits(7) == 4",
+      "assert find_Digits(5) == 3",
+      "assert find_Digits(4) == 2"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 844
+  },
+  {
+    "text": "Write a python function to find sum of inverse of divisors.",
+    "code": "def Sum_of_Inverse_Divisors(N,Sum): \r\n    ans = float(Sum)*1.0 /float(N);  \r\n    return round(ans,2); ",
+    "task_id": 851,
+    "test_setup_code": "",
+    "test_list": [
+      "assert Sum_of_Inverse_Divisors(6,12) == 2",
+      "assert Sum_of_Inverse_Divisors(9,13) == 1.44",
+      "assert Sum_of_Inverse_Divisors(1,4) == 4"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 850
+  },
+  {
+    "text": "Write a python function to find sum of odd factors of a number.",
+    "code": "import math\r\ndef sum_of_odd_Factors(n): \r\n    res = 1\r\n    while n % 2 == 0: \r\n        n = n // 2 \r\n    for i in range(3,int(math.sqrt(n) + 1)): \r\n        count = 0\r\n        curr_sum = 1\r\n        curr_term = 1\r\n        while n % i == 0: \r\n            count+=1 \r\n            n = n // i \r\n            curr_term *= i \r\n            curr_sum += curr_term    \r\n        res *= curr_sum  \r\n    if n >= 2: \r\n        res *= (1 + n) \r\n    return res ",
+    "task_id": 853,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_of_odd_Factors(30) == 24",
+      "assert sum_of_odd_Factors(18) == 13",
+      "assert sum_of_odd_Factors(2) == 1"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 852
+  },
+  {
+    "text": "Write a function to calculate the sum of the positive numbers of a given list of numbers using lambda function.",
+    "code": "def sum_positivenum(nums):\r\n  sum_positivenum = list(filter(lambda nums:nums>0,nums))\r\n  return sum(sum_positivenum)",
+    "task_id": 870,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_positivenum([2, 4, -6, -9, 11, -12, 14, -5, 17])==48",
+      "assert sum_positivenum([10,15,-14,13,-18,12,-20])==50",
+      "assert sum_positivenum([19, -65, 57, 39, 152,-639, 121, 44, 90, -190])==522"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 869
+  },
+  {
+    "text": "Write a python function to find number of solutions in quadratic equation.",
+    "code": "def Check_Solution(a,b,c) : \r\n    if ((b*b) - (4*a*c)) > 0 : \r\n        return (\"2 solutions\") \r\n    elif ((b*b) - (4*a*c)) == 0 : \r\n        return (\"1 solution\") \r\n    else : \r\n        return (\"No solutions\") ",
+    "task_id": 880,
+    "test_setup_code": "",
+    "test_list": [
+      "assert Check_Solution(2,5,2) == \"2 solutions\"",
+      "assert Check_Solution(1,1,1) == \"No solutions\"",
+      "assert Check_Solution(1,2,1) == \"1 solution\""
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 879
+  },
+  {
+    "text": "Write a function to add all the numbers in a list and divide it with the length of the list.",
+    "code": "def sum_num(numbers):\r\n    total = 0\r\n    for x in numbers:\r\n        total += x\r\n    return total/len(numbers) ",
+    "task_id": 886,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_num((8, 2, 3, 0, 7))==4.0",
+      "assert sum_num((-10,-20,-30))==-20.0",
+      "assert sum_num((19,15,18))==17.333333333333332"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 885
+  },
+  {
+    "text": "Write a function to extract year, month and date from a url by using regex.",
+    "code": "import re\r\ndef extract_date(url):\r\n        return re.findall(r'/(\\d{4})/(\\d{1,2})/(\\d{1,2})/', url)",
+    "task_id": 906,
+    "test_setup_code": "",
+    "test_list": [
+      "assert extract_date(\"https://www.washingtonpost.com/news/football-insider/wp/2016/09/02/odell-beckhams-fame-rests-on-one-stupid-little-ball-josh-norman-tells-author/\") == [('2016', '09', '02')]",
+      "assert extract_date(\"https://www.indiatoday.in/movies/celebrities/story/wp/2020/11/03/odeof-sushant-singh-rajput-s-death-his-brother-in-law-shares-advice-for-fans-1749646/\") == [('2020', '11', '03')]",
+      "assert extract_date(\"https://economictimes.indiatimes.com/news/economy/2020/12/29/finance/pension-assets-under-pfrda-touch-rs-5-32-lakh-crore/articleshow/79736619.cms\") == [('2020', '12', '29')]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 905
+  },
+  {
+    "text": "Write a function to compute maximum product of three numbers of a given array of integers using heap queue algorithm.",
+    "code": "def maximum_product(nums):\r\n    import heapq\r\n    a, b = heapq.nlargest(3, nums), heapq.nsmallest(2, nums)\r\n    return max(a[0] * a[1] * a[2], a[0] * b[0] * b[1])",
+    "task_id": 911,
+    "test_setup_code": "",
+    "test_list": [
+      "assert maximum_product( [12, 74, 9, 50, 61, 41])==225700",
+      "assert maximum_product([25, 35, 22, 85, 14, 65, 75, 25, 58])==414375",
+      "assert maximum_product([18, 14, 10, 9, 8, 7, 9, 3, 2, 4, 1])==2520"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 910
+  },
+  {
+    "text": "Write a function to calculate the height of the given binary tree.",
+    "code": "class Node: \r\n\tdef __init__(self, data): \r\n\t\tself.data = data \r\n\t\tself.left = None\r\n\t\tself.right = None\r\ndef max_height(node): \r\n\tif node is None: \r\n\t\treturn 0 ; \r\n\telse : \r\n\t\tleft_height = max_height(node.left) \r\n\t\tright_height = max_height(node.right) \r\n\t\tif (left_height > right_height): \r\n\t\t\treturn left_height+1\r\n\t\telse: \r\n\t\t\treturn right_height+1",
+    "task_id": 927,
+    "test_setup_code": "root = Node(1) \r\nroot.left = Node(2) \r\nroot.right = Node(3) \r\nroot.left.left = Node(4) \r\nroot.left.right = Node(5) \r\nroot1 = Node(1);  \r\nroot1.left = Node(2);  \r\nroot1.right = Node(3);  \r\nroot1.left.left = Node(4);  \r\nroot1.right.left = Node(5);  \r\nroot1.right.right = Node(6);  \r\nroot1.right.right.right= Node(7);  \r\nroot1.right.right.right.right = Node(8)\r\nroot2 = Node(1) \r\nroot2.left = Node(2) \r\nroot2.right = Node(3) \r\nroot2.left.left = Node(4) \r\nroot2.left.right = Node(5)\r\nroot2.left.left.left = Node(6)\r\nroot2.left.left.right = Node(7)",
+    "test_list": [
+      "assert (max_height(root)) == 3",
+      "assert (max_height(root1)) == 5 ",
+      "assert (max_height(root2)) == 4"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 926
+  },
+  {
+    "text": "Write a function to calculate the sum of series 1³+2³+3³+….+n³.",
+    "code": "import math \r\ndef sum_series(number):\r\n total = 0\r\n total = math.pow((number * (number + 1)) /2, 2)\r\n return total",
+    "task_id": 931,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sum_series(7)==784",
+      "assert sum_series(5)==225",
+      "assert sum_series(15)==14400"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 930
+  },
+  {
+    "text": "Write a function to convert camel case string to snake case string by using regex.",
+    "code": "import re\r\ndef camel_to_snake(text):\r\n  str1 = re.sub('(.)([A-Z][a-z]+)', r'\\1_\\2', text)\r\n  return re.sub('([a-z0-9])([A-Z])', r'\\1_\\2', str1).lower()",
+    "task_id": 933,
+    "test_setup_code": "",
+    "test_list": [
+      "assert camel_to_snake('GoogleAssistant') == 'google_assistant'",
+      "assert camel_to_snake('ChromeCast') == 'chrome_cast'",
+      "assert camel_to_snake('QuadCore') == 'quad_core'"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 932
+  },
+  {
+    "text": "Write a function to calculate the sum of series 1²+2²+3²+….+n².",
+    "code": "def series_sum(number):\r\n total = 0\r\n total = (number * (number + 1) * (2 * number + 1)) / 6\r\n return total",
+    "task_id": 935,
+    "test_setup_code": "",
+    "test_list": [
+      "assert series_sum(6)==91",
+      "assert series_sum(7)==140",
+      "assert series_sum(12)==650"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 934
+  },
+  {
+    "text": "Write a function to sort a list of dictionaries using lambda function.",
+    "code": "def sorted_models(models):\r\n sorted_models = sorted(models, key = lambda x: x['color'])\r\n return sorted_models",
+    "task_id": 939,
+    "test_setup_code": "",
+    "test_list": [
+      "assert sorted_models([{'make':'Nokia', 'model':216, 'color':'Black'}, {'make':'Mi Max', 'model':2, 'color':'Gold'}, {'make':'Samsung', 'model': 7, 'color':'Blue'}])==[{'make': 'Nokia', 'model': 216, 'color': 'Black'}, {'make': 'Samsung', 'model': 7, 'color': 'Blue'}, {'make': 'Mi Max', 'model': 2, 'color': 'Gold'}]",
+      "assert sorted_models([{'make':'Vivo', 'model':20,'color':'Blue'},{'make': 'oppo','model':17,'color':'Gold'},{'make':'Apple','model':11,'color':'red'}])==([{'make':'Vivo', 'model':20,'color':'Blue'},{'make': 'oppo','model':17,'color':'Gold'},{'make':'Apple','model':11,'color':'red'}])",
+      "assert sorted_models([{'make':'micromax','model':40,'color':'grey'},{'make':'poco','model':60,'color':'blue'}])==([{'make':'poco','model':60,'color':'blue'},{'make':'micromax','model':40,'color':'grey'}])"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 938
+  },
+  {
+    "text": "Write a function to sort the given array by using heap sort.",
+    "code": "def heap_sort(arr):\r\n    heapify(arr)  \r\n    end = len(arr) - 1\r\n    while end > 0:\r\n        arr[end], arr[0] = arr[0], arr[end]\r\n        shift_down(arr, 0, end - 1)\r\n        end -= 1\r\n    return arr\r\n\r\ndef heapify(arr):\r\n    start = len(arr) // 2\r\n    while start >= 0:\r\n        shift_down(arr, start, len(arr) - 1)\r\n        start -= 1\r\ndef shift_down(arr, start, end):\r\n    root = start\r\n    while root * 2 + 1 <= end:\r\n        child = root * 2 + 1\r\n        if child + 1 <= end and arr[child] < arr[child + 1]:\r\n            child += 1\r\n        if child <= end and arr[root] < arr[child]:\r\n            arr[root], arr[child] = arr[child], arr[root]\r\n            root = child\r\n        else:\r\n            return\r\n",
+    "task_id": 940,
+    "test_setup_code": "",
+    "test_list": [
+      "assert heap_sort([12, 2, 4, 5, 2, 3]) == [2, 2, 3, 4, 5, 12]",
+      "assert heap_sort([32, 14, 5, 6, 7, 19]) == [5, 6, 7, 14, 19, 32]",
+      "assert heap_sort([21, 15, 29, 78, 65]) == [15, 21, 29, 65, 78]"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 939
+  },
+  {
+    "text": "Write a function to count the elements in a list until an element is a tuple.",
+    "code": "def count_elim(num):\r\n  count_elim = 0\r\n  for n in num:\r\n    if isinstance(n, tuple):\r\n        break\r\n    count_elim += 1\r\n  return count_elim",
+    "task_id": 941,
+    "test_setup_code": "",
+    "test_list": [
+      "assert count_elim([10,20,30,(10,20),40])==3",
+      "assert count_elim([10,(20,30),(10,20),40])==1",
+      "assert count_elim([(10,(20,30,(10,20),40))])==0"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 940
+  },
+  {
+    "text": "Write a function to split the given string at uppercase letters by using regex.",
+    "code": "import re\r\ndef split_list(text):\r\n  return (re.findall('[A-Z][^A-Z]*', text))",
+    "task_id": 956,
+    "test_setup_code": "",
+    "test_list": [
+      "assert split_list(\"LearnToBuildAnythingWithGoogle\") == ['Learn', 'To', 'Build', 'Anything', 'With', 'Google']",
+      "assert split_list(\"ApmlifyingTheBlack+DeveloperCommunity\") == ['Apmlifying', 'The', 'Black+', 'Developer', 'Community']",
+      "assert split_list(\"UpdateInTheGoEcoSystem\") == ['Update', 'In', 'The', 'Go', 'Eco', 'System']"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 955
+  },
+  {
+    "text": "Write a python function to get the position of rightmost set bit.",
+    "code": "import math\r\ndef get_First_Set_Bit_Pos(n):\r\n     return math.log2(n&-n)+1",
+    "task_id": 957,
+    "test_setup_code": "",
+    "test_list": [
+      "assert get_First_Set_Bit_Pos(12) == 3",
+      "assert get_First_Set_Bit_Pos(18) == 2",
+      "assert get_First_Set_Bit_Pos(16) == 5"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 956
+  },
+  {
+    "text": "Write a function to calculate the discriminant value.",
+    "code": "def discriminant_value(x,y,z):\r\n    discriminant = (y**2) - (4*x*z)\r\n    if discriminant > 0:\r\n        return (\"Two solutions\",discriminant)\r\n    elif discriminant == 0:\r\n        return (\"one solution\",discriminant)\r\n    elif discriminant < 0:\r\n        return (\"no real solution\",discriminant)",
+    "task_id": 963,
+    "test_setup_code": "",
+    "test_list": [
+      "assert discriminant_value(4,8,2)==(\"Two solutions\",32)",
+      "assert discriminant_value(5,7,9)==(\"no real solution\",-131)",
+      "assert discriminant_value(0,0,9)==(\"one solution\",0)"
+    ],
+    "challenge_test_list": [],
+    "_dataset": "MBPP_original",
+    "_original_index": 962
+  }
+]
